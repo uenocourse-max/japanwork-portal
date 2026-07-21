@@ -1,0 +1,337 @@
+@extends('layouts.app')
+
+@php
+    $buildUrl = function ($overrides) {
+        $params = request()->except(['view', 'page']);
+        foreach ($overrides as $key => $value) {
+            if ($value === null) {
+                unset($params[$key]);
+            } else {
+                $params[$key] = $value;
+            }
+        }
+        return route('student.jobs.index', $params);
+    };
+@endphp
+
+@section('content')
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Lowongan Kerja</h1>
+            <p class="text-sm text-gray-500 mt-0.5">Temukan lowongan yang sesuai dengan kualifikasi Anda</p>
+        </div>
+        <a href="{{ route('student.applications.index') }}" class="text-sm text-blue-600 hover:text-blue-700 font-medium">Lamaran Saya →</a>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <form method="GET" action="{{ route('student.jobs.index') }}" id="studentSearchForm">
+            <input type="hidden" name="view" value="{{ $view }}">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                <div class="md:col-span-2 relative">
+                    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul atau perusahaan..."
+                        class="w-full pl-9 pr-4 py-2.5 bg-gray-50 border-0 rounded-lg text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+                        data-auto-submit data-debounce="400">
+                </div>
+                <select name="ssw_category_id" class="bg-gray-50 border-0 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-blue-500" data-auto-submit>
+                    <option value="">Semua Kategori</option>
+                    @foreach ($sswCategories as $category)
+                        <option value="{{ $category->id }}" {{ request('ssw_category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                    @endforeach
+                </select>
+                <select name="job_type" class="bg-gray-50 border-0 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-blue-500" data-auto-submit>
+                    <option value="">Semua Jenis</option>
+                    <option value="magang" {{ request('job_type') === 'magang' ? 'selected' : '' }}>Magang</option>
+                    <option value="tg" {{ request('job_type') === 'tg' ? 'selected' : '' }}>Tokutei Ginou (SSW)</option>
+                    <option value="engineer" {{ request('job_type') === 'engineer' ? 'selected' : '' }}>Engineer / Gijinkoku</option>
+                </select>
+                <select name="jlpt_level" class="bg-gray-50 border-0 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-blue-500" data-auto-submit>
+                    <option value="">Semua JLPT</option>
+                    @foreach (['N5', 'N4', 'N3', 'N2', 'N1', 'JFT Basic A2'] as $level)
+                        <option value="{{ $level }}" {{ request('jlpt_level') === $level ? 'selected' : '' }}>{{ $level }}</option>
+                    @endforeach
+                </select>
+                <div class="flex gap-2">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 text-sm font-medium transition">Cari</button>
+                            @if (request()->hasAny(['search', 'ssw_category_id', 'job_type', 'jlpt_level', 'location']))
+                        <a href="{{ route('student.jobs.index') }}" class="px-3 py-2.5 text-gray-500 hover:text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition">Reset</a>
+                    @endif
+                </div>
+            </div>
+            <div class="mt-3">
+                <select name="location" class="w-full md:w-1/3 px-4 py-2.5 bg-gray-50 border-0 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-blue-500 appearance-none" data-auto-submit>
+                    <option value="">Semua Prefektur</option>
+                    @foreach (config('prefectures.all') as $pref)
+                        <option value="{{ $pref }}" {{ request('location') === $pref ? 'selected' : '' }}>{{ $pref }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <div class="flex items-center justify-between">
+        <p class="text-sm text-gray-500">{{ $jobs->total() }} lowongan ditemukan</p>
+        <div class="flex items-center gap-2">
+            <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
+                <a href="{{ $buildUrl(['view' => 'detail']) }}" title="Detail" class="p-1.5 {{ $view === 'detail' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:text-gray-600' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                </a>
+                <div class="w-px h-4 bg-gray-200"></div>
+                <a href="{{ $buildUrl(['view' => 'compact']) }}" title="Sederhana" class="p-1.5 {{ $view === 'compact' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:text-gray-600' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                </a>
+                <div class="w-px h-4 bg-gray-200"></div>
+                <a href="{{ $buildUrl(['view' => 'list']) }}" title="List" class="p-1.5 {{ $view === 'list' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:text-gray-600' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </a>
+                <div class="w-px h-4 bg-gray-200"></div>
+                <a href="{{ $buildUrl(['view' => 'grid']) }}" title="Kotak" class="p-1.5 {{ $view === 'grid' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:text-gray-600' }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if ($jobs->count() > 0)
+        @if ($view === 'detail')
+            <div class="space-y-3">
+                @foreach ($jobs as $job)
+                    <a href="{{ route('student.jobs.show', $job) }}" class="block bg-white rounded-xl border border-gray-200 p-5 hover:shadow-lg hover:border-blue-300 hover:-translate-y-0.5 transition-all duration-200 group">
+                        <div class="flex items-start gap-4">
+                            @if ($job->thumbnail_display_url)
+                                <img src="{{ $job->thumbnail_display_url }}" alt="{{ $job->company_name }}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0 shadow-md" loading="lazy">
+                            @else
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-blue-500/20">
+                                    <span class="text-white font-bold text-lg">{{ substr($job->company_name, 0, 1) }}</span>
+                                </div>
+                            @endif
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                        <h3 class="font-bold text-gray-900 group-hover:text-blue-600 transition line-clamp-1">{{ $job->title }}</h3>
+                                        <p class="text-sm text-gray-600 mt-0.5">{{ $job->company_name }}</p>
+                                    </div>
+                                    @if ($job->deadline && $job->deadline->diffInDays(now()) <= 7)
+                                        <span class="flex-shrink-0 bg-red-50 text-red-600 border border-red-200 text-xs px-2.5 py-1 rounded-full font-medium">Closing</span>
+                                    @endif
+                                </div>
+                                 <div class="flex flex-wrap items-center gap-2 mt-3">
+                                     <span class="inline-flex items-center gap-1 text-xs text-gray-500">
+                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                                         {{ $job->location }}
+                                     </span>
+                                     <span class="inline-flex items-center gap-1 text-xs text-gray-400">
+                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/></svg>
+                                         {{ $job->applications_count }} pelamar
+                                     </span>
+                                     @if ($job->sswCategory)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">{{ $job->sswCategory->name }}</span>
+                                    @endif
+                                    @if ($job->jlpt_level_required)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100">JLPT {{ $job->jlpt_level_required }}</span>
+                                    @endif
+                                </div>
+                                @if ($job->salary_min || $job->salary_max)
+                                    <div class="mt-2.5 text-sm font-bold text-green-700">
+                                        @if ($job->salary_min && $job->salary_max)
+                                            ¥{{ number_format($job->salary_min) }} - ¥{{ number_format($job->salary_max) }}
+                                        @elseif ($job->salary_min)
+                                            Mulai ¥{{ number_format($job->salary_min) }}
+                                        @else
+                                            S.d ¥{{ number_format($job->salary_max) }}
+                                        @endif
+                                        <span class="text-xs text-gray-400 font-normal">/ bulan</span>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="hidden sm:flex items-center">
+                                <svg class="w-5 h-5 text-gray-300 group-hover:text-blue-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                            </div>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+
+        @elseif ($view === 'compact')
+            <div class="space-y-2">
+                @foreach ($jobs as $job)
+                    <a href="{{ route('student.jobs.show', $job) }}" class="flex items-center gap-3 bg-white rounded-lg border border-gray-200 px-4 py-3 hover:shadow-md hover:border-blue-300 transition group">
+                        @if ($job->thumbnail_display_url)
+                            <img src="{{ $job->thumbnail_display_url }}" alt="{{ $job->company_name }}" class="w-10 h-10 rounded-lg object-cover flex-shrink-0" loading="lazy">
+                        @else
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+                                <span class="text-white font-bold text-sm">{{ substr($job->company_name, 0, 1) }}</span>
+                            </div>
+                        @endif
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-gray-900 group-hover:text-blue-600 transition text-sm line-clamp-1">{{ $job->title }}</h3>
+                            <div class="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
+                                <span>{{ $job->company_name }}</span>
+                                <span class="text-gray-300">·</span>
+                                <span>{{ $job->location }}</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-1.5 flex-shrink-0">
+                            @if ($job->sswCategory)
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700">{{ $job->sswCategory->name }}</span>
+                            @endif
+                            @if ($job->jlpt_level_required)
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-50 text-purple-700">{{ $job->jlpt_level_required }}</span>
+                            @endif
+                            @if ($job->salary_min || $job->salary_max)
+                                <span class="text-xs font-bold text-green-700">
+                                    @if ($job->salary_min && $job->salary_max)
+                                        ¥{{ number_format($job->salary_min) }}-{{ number_format($job->salary_max) }}
+                                    @elseif ($job->salary_min)
+                                        ¥{{ number_format($job->salary_min) }}~
+                                    @else
+                                        ~¥{{ number_format($job->salary_max) }}
+                                    @endif
+                                </span>
+                            @endif
+                        </div>
+                        <svg class="w-4 h-4 text-gray-300 group-hover:text-blue-500 transition flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                @endforeach
+            </div>
+
+        @elseif ($view === 'list')
+            <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100 overflow-hidden">
+                @foreach ($jobs as $job)
+                    <a href="{{ route('student.jobs.show', $job) }}" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition group">
+                        @if ($job->thumbnail_display_url)
+                            <img src="{{ $job->thumbnail_display_url }}" alt="{{ $job->company_name }}" class="w-10 h-10 rounded-lg object-cover flex-shrink-0" loading="lazy">
+                        @else
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+                                <span class="text-white font-bold text-sm">{{ substr($job->company_name, 0, 1) }}</span>
+                            </div>
+                        @endif
+                        <div class="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-4 gap-1">
+                            <div class="sm:col-span-2">
+                                <h3 class="font-semibold text-gray-900 group-hover:text-blue-600 transition text-sm line-clamp-1">{{ $job->title }}</h3>
+                                <p class="text-xs text-gray-500">{{ $job->company_name }}</p>
+                            </div>
+                            <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                                {{ $job->location }}
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                @if ($job->sswCategory)
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700">{{ $job->sswCategory->name }}</span>
+                                @endif
+                                @if ($job->jlpt_level_required)
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-50 text-purple-700">{{ $job->jlpt_level_required }}</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0 text-right hidden sm:block">
+                            @if ($job->salary_min || $job->salary_max)
+                                <div class="text-xs font-bold text-green-700">
+                                    @if ($job->salary_min && $job->salary_max)
+                                        ¥{{ number_format($job->salary_min) }} - ¥{{ number_format($job->salary_max) }}
+                                    @elseif ($job->salary_min)
+                                        Mulai ¥{{ number_format($job->salary_min) }}
+                                    @else
+                                        S.d ¥{{ number_format($job->salary_max) }}
+                                    @endif
+                                </div>
+                            @endif
+                            @if ($job->deadline && $job->deadline->diffInDays(now()) <= 7)
+                                <span class="text-[10px] text-red-500 font-medium">Closing {{ $job->deadline->diffForHumans() }}</span>
+                            @endif
+                        </div>
+                        <svg class="w-4 h-4 text-gray-300 group-hover:text-blue-500 transition flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                @endforeach
+            </div>
+
+        @else
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                @foreach ($jobs as $job)
+                    <a href="{{ route('student.jobs.show', $job) }}" class="block bg-white rounded-xl border border-gray-200 p-4 hover:shadow-lg hover:border-blue-300 transition group">
+                        <div class="flex items-start gap-3 mb-3">
+                            @if ($job->thumbnail_display_url)
+                                <img src="{{ $job->thumbnail_display_url }}" alt="{{ $job->company_name }}" class="w-10 h-10 rounded-lg object-cover flex-shrink-0" loading="lazy">
+                            @else
+                                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+                                    <span class="text-white font-bold text-sm">{{ substr($job->company_name, 0, 1) }}</span>
+                                </div>
+                            @endif
+                            <div class="min-w-0">
+                                <h3 class="font-bold text-gray-900 group-hover:text-blue-600 transition text-sm line-clamp-2">{{ $job->title }}</h3>
+                                <p class="text-xs text-gray-500 mt-0.5">{{ $job->company_name }}</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-1.5 mb-2">
+                            <span class="inline-flex items-center gap-1 text-[11px] text-gray-500">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                                {{ $job->location }}
+                            </span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            @if ($job->sswCategory)
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-100">{{ $job->sswCategory->name }}</span>
+                            @endif
+                            @if ($job->jlpt_level_required)
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-50 text-purple-700 border border-purple-100">{{ $job->jlpt_level_required }}</span>
+                            @endif
+                            @if ($job->deadline && $job->deadline->diffInDays(now()) <= 7)
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-50 text-red-600 border border-red-200">Closing</span>
+                            @endif
+                        </div>
+                        @if ($job->salary_min || $job->salary_max)
+                            <div class="mt-2.5 pt-2.5 border-t border-gray-100">
+                                <span class="text-xs font-bold text-green-700">
+                                    @if ($job->salary_min && $job->salary_max)
+                                        ¥{{ number_format($job->salary_min) }} - ¥{{ number_format($job->salary_max) }}
+                                    @elseif ($job->salary_min)
+                                        Mulai ¥{{ number_format($job->salary_min) }}
+                                    @else
+                                        S.d ¥{{ number_format($job->salary_max) }}
+                                    @endif
+                                    <span class="text-gray-400 font-normal">/ bln</span>
+                                </span>
+                            </div>
+                        @endif
+                    </a>
+                @endforeach
+            </div>
+        @endif
+
+        <div class="mt-6">
+            {{ $jobs->links() }}
+        </div>
+    @else
+        <div class="bg-white rounded-xl border border-gray-200 text-center py-16">
+            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <p class="text-gray-600 font-medium mb-1">Belum ada lowongan tersedia</p>
+            <p class="text-gray-400 text-sm">Coba ubah filter pencarian Anda</p>
+        </div>
+    @endif
+</div>
+@endsection
+
+@push('scripts')
+<script>
+(function () {
+    var form = document.getElementById('studentSearchForm');
+    var timers = {};
+
+    form.querySelectorAll('[data-auto-submit]').forEach(function (el) {
+        var evt = el.tagName === 'SELECT' ? 'change' : 'input';
+        var delay = parseInt(el.getAttribute('data-debounce')) || 0;
+
+        el.addEventListener(evt, function () {
+            var key = el.getAttribute('name');
+            if (timers[key]) clearTimeout(timers[key]);
+            timers[key] = setTimeout(function () {
+                form.submit();
+            }, delay);
+        });
+    });
+})();
+</script>
+@endpush
