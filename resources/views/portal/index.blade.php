@@ -22,86 +22,102 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-24 relative">
-        <div class="text-center mb-10">
-            <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">
-                Cari Kerja di <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">Jepang</span>
-            </h1>
-            <p class="text-lg text-blue-100/80 max-w-2xl mx-auto">
-                Ribuan lowongan kerja SSW menanti Anda. Temukan posisi terbaik dan mulai karir di Jepang.
-            </p>
-        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {{-- Left: Text & Search Form --}}
+            <div>
+                <div class="mb-8">
+                    <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">
+                        Cari Kerja di <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">Jepang</span>
+                    </h1>
+                    <p class="text-lg text-blue-100/80 max-w-xl">
+                        Ribuan lowongan kerja SSW menanti Anda. Temukan posisi terbaik dan mulai karir di Jepang.
+                    </p>
+                </div>
 
-        <form method="GET" action="{{ route('portal.index') }}" class="max-w-4xl mx-auto" id="searchForm">
-            <input type="hidden" name="view" value="{{ $view }}">
-            <div class="bg-white rounded-2xl p-2 shadow-2xl shadow-black/20">
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-2">
-                    <div class="md:col-span-4 relative">
-                        <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <form method="GET" action="{{ route('portal.index') }}" class="max-w-xl" id="searchForm">
+                    <input type="hidden" name="view" value="{{ $view }}">
+                    <div class="bg-white rounded-2xl p-2 shadow-2xl shadow-black/20">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-2">
+                            <div class="md:col-span-5 relative">
+                                <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                </div>
+                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul atau perusahaan..."
+                                    class="w-full pl-10 pr-4 py-3 bg-gray-50 border-0 rounded-xl text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+                                    data-auto-submit data-debounce="400">
+                            </div>
+                            <div class="md:col-span-4">
+                                <select name="job_type" class="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl text-gray-700 text-sm focus:ring-2 focus:ring-blue-500 appearance-none" data-auto-submit>
+                                    <option value="">Semua Jenis</option>
+                                    <option value="magang" {{ request('job_type') === 'magang' ? 'selected' : '' }}>Magang</option>
+                                    <option value="tg" {{ request('job_type') === 'tg' ? 'selected' : '' }}>Tokutei Ginou (SSW)</option>
+                                    <option value="engineer" {{ request('job_type') === 'engineer' ? 'selected' : '' }}>Engineer / Gijinkoku</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-3">
+                                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition font-semibold text-sm shadow-lg shadow-blue-600/25">
+                                    Cari
+                                </button>
+                            </div>
                         </div>
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul atau perusahaan..."
-                            class="w-full pl-10 pr-4 py-3 bg-gray-50 border-0 rounded-xl text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
-                            data-auto-submit data-debounce="400">
+                        <div class="px-2 pb-2 pt-1 grid grid-cols-2 gap-2">
+                            <select name="ssw_category_id" class="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl text-gray-700 text-sm focus:ring-2 focus:ring-blue-500 appearance-none" data-auto-submit>
+                                <option value="">Semua Kategori</option>
+                                @foreach ($sswCategories as $category)
+                                    <option value="{{ $category->id }}" {{ request('ssw_category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                            <select name="location" class="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl text-gray-700 text-sm focus:ring-2 focus:ring-blue-500 appearance-none" data-auto-submit>
+                                <option value="">Semua Prefektur</option>
+                                @foreach (config('prefectures.all') as $pref)
+                                    <option value="{{ $pref }}" {{ request('location') === $pref ? 'selected' : '' }}>{{ $pref }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
-                    <div class="md:col-span-2">
-                        <select name="ssw_category_id" class="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl text-gray-700 text-sm focus:ring-2 focus:ring-blue-500 appearance-none" data-auto-submit>
-                            <option value="">Semua Kategori</option>
-                            @foreach ($sswCategories as $category)
-                                <option value="{{ $category->id }}" {{ request('ssw_category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="md:col-span-2">
-                        <select name="job_type" class="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl text-gray-700 text-sm focus:ring-2 focus:ring-blue-500 appearance-none" data-auto-submit>
-                            <option value="">Semua Jenis</option>
-                            <option value="magang" {{ request('job_type') === 'magang' ? 'selected' : '' }}>Magang</option>
-                            <option value="tg" {{ request('job_type') === 'tg' ? 'selected' : '' }}>Tokutei Ginou (SSW)</option>
-                            <option value="engineer" {{ request('job_type') === 'engineer' ? 'selected' : '' }}>Engineer / Gijinkoku</option>
-                        </select>
-                    </div>
-                    <div class="md:col-span-2">
-                        <select name="jlpt_level" class="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl text-gray-700 text-sm focus:ring-2 focus:ring-blue-500 appearance-none" data-auto-submit>
-                            <option value="">Semua JLPT</option>
-                            @foreach (['N5', 'N4', 'N3', 'N2', 'N1', 'JFT Basic A2'] as $level)
-                                <option value="{{ $level }}" {{ request('jlpt_level') === $level ? 'selected' : '' }}>{{ $level }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="md:col-span-2">
-                        <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition font-semibold text-sm shadow-lg shadow-blue-600/25">
-                            Cari
-                        </button>
-                    </div>
-                </div>
-                <div class="px-2 pb-2 pt-1">
-                    <select name="location" class="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl text-gray-700 text-sm focus:ring-2 focus:ring-blue-500 appearance-none" data-auto-submit>
-                        <option value="">Semua Prefektur</option>
-                        @foreach (config('prefectures.all') as $pref)
-                            <option value="{{ $pref }}" {{ request('location') === $pref ? 'selected' : '' }}>{{ $pref }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-        </form>
+                </form>
 
-        <div class="flex flex-wrap justify-center gap-6 mt-10 text-sm">
-            <div class="flex items-center gap-2 text-blue-100/70">
-                <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <div class="flex flex-wrap gap-6 mt-8 text-sm">
+                    <div class="flex items-center gap-2 text-blue-100/70">
+                        <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        </div>
+                        <span><strong class="text-white">{{ $totalJobs }}</strong> Lowongan Aktif</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-blue-100/70">
+                        <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        </div>
+                        <span><strong class="text-white">{{ $sswCategories->count() }}</strong> Kategori SSW</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-blue-100/70">
+                        <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
+                        </div>
+                        <span><strong class="text-white">10+</strong> Kota di Jepang</span>
+                    </div>
                 </div>
-                <span><strong class="text-white">{{ $totalJobs }}</strong> Lowongan Aktif</span>
             </div>
-            <div class="flex items-center gap-2 text-blue-100/70">
-                <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+
+            {{-- Right: Hero Images --}}
+            <div class="hidden lg:block relative">
+                <div class="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/30">
+                    <img src="{{ asset('images/hero/office-workers.jpg') }}" alt="Tim kerja di Jepang"
+                        class="w-full h-80 object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
+                    <div class="absolute bottom-4 left-4 right-4">
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                            <p class="text-white text-sm font-medium">Tim profesional siap membantu karir Anda di Jepang</p>
+                        </div>
+                    </div>
                 </div>
-                <span><strong class="text-white">{{ $sswCategories->count() }}</strong> Kategori SSW</span>
-            </div>
-            <div class="flex items-center gap-2 text-blue-100/70">
-                <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
+                <div class="absolute -bottom-6 -left-6 rounded-2xl overflow-hidden shadow-xl border-4 border-white/10 w-48 h-32">
+                    <img src="{{ asset('images/hero/factory-workers.jpg') }}" alt="Pekerja di pabrik Jepang"
+                        class="w-full h-full object-cover">
                 </div>
-                <span><strong class="text-white">10+</strong> Kota di Jepang</span>
+                <div class="absolute -top-4 -right-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl px-4 py-2 shadow-lg">
+                    <p class="text-white text-sm font-bold">1000+ Berhasil Ditempatkan</p>
+                </div>
             </div>
         </div>
     </div>
