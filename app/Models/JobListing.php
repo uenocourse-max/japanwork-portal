@@ -84,7 +84,11 @@ class JobListing extends Model
             return "https://drive.google.com/uc?export=view&id={$matches[1]}";
         }
 
-        return $this->thumbnail_url;
+        if (str_starts_with($this->thumbnail_url, 'http')) {
+            return $this->thumbnail_url;
+        }
+
+        return asset($this->thumbnail_url);
     }
 
     public function applicants()
