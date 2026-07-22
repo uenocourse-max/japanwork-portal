@@ -99,23 +99,72 @@
                 </div>
             </div>
 
-            {{-- Right: Hero Images --}}
-            <div class="hidden lg:block relative">
-                <div class="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/30">
-                    <img src="{{ asset('images/hero/office-workers.jpg') }}" alt="Tim kerja di Jepang"
-                        class="w-full h-80 object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
-                    <div class="absolute bottom-4 left-4 right-4">
-                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                            <p class="text-white text-sm font-medium">Tim profesional siap membantu karir Anda di Jepang</p>
+            {{-- Right: Hero Carousel --}}
+            <div class="hidden lg:block relative"
+                x-data="{
+                    current: 0,
+                    total: 4,
+                    autoplay: null,
+                    slides: [
+                        { img: '{{ asset('images/hero/office-workers.jpg') }}', alt: 'Tim kerja di Jepang', caption: 'Tim Profesional', sub: 'Bergabung dengan perusahaan terkemuka di Jepang' },
+                        { img: '{{ asset('images/jobs/kaigo-tokyo.jpg') }}', alt: 'Perawat lansia di Tokyo', caption: 'Perawat Lansia (Kaigo)', sub: 'Peluang karir di bidang perawatan lansia' },
+                        { img: '{{ asset('images/jobs/construction-nagoya.jpg') }}', alt: 'Pekerja konstruksi', caption: 'Konstruksi & Infrastruktur', sub: 'Bangun masa depan di Jepang' },
+                        { img: '{{ asset('images/jobs/chef-kobe.jpg') }}', alt: 'Chef kuliner Jepang', caption: 'Kuliner Jepang', sub: 'Jadilah bagian dari industri kuliner' },
+                    ],
+                    init() {
+                        this.autoplay = setInterval(() => this.next(), 5000);
+                    },
+                    next() {
+                        this.current = (this.current + 1) % this.total;
+                    },
+                    goTo(i) {
+                        this.current = i;
+                        clearInterval(this.autoplay);
+                        this.autoplay = setInterval(() => this.next(), 5000);
+                    },
+                    pause() {
+                        clearInterval(this.autoplay);
+                    },
+                    resume() {
+                        this.autoplay = setInterval(() => this.next(), 5000);
+                    }
+                }"
+                @mouseenter="pause()" @mouseleave="resume()">
+
+                {{-- Slides --}}
+                <div class="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/30 h-80">
+                    <template x-for="(slide, i) in slides" :key="i">
+                        <div class="absolute inset-0 transition-opacity duration-700 ease-in-out"
+                            :class="current === i ? 'opacity-100 z-10' : 'opacity-0 z-0'">
+                            <img :src="slide.img" :alt="slide.alt" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent"></div>
+                            <div class="absolute bottom-0 left-0 right-0 p-5">
+                                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                                    <p class="text-white font-bold text-base" x-text="slide.caption"></p>
+                                    <p class="text-blue-200/80 text-sm mt-0.5" x-text="slide.sub"></p>
+                                </div>
+                            </div>
                         </div>
+                    </template>
+
+                    {{-- Dot indicators --}}
+                    <div class="absolute top-4 right-4 z-20 flex flex-col gap-2">
+                        <template x-for="i in total" :key="i">
+                            <button @click="goTo(i - 1)"
+                                class="w-2.5 h-2.5 rounded-full transition-all duration-300"
+                                :class="current === (i - 1) ? 'bg-white scale-110 shadow-lg shadow-white/30' : 'bg-white/40 hover:bg-white/60'">
+                            </button>
+                        </template>
+                    </div>
+
+                    {{-- Slide counter --}}
+                    <div class="absolute top-4 left-4 z-20 bg-black/30 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-white/10">
+                        <span class="text-white text-xs font-medium" x-text="(current + 1) + ' / ' + total"></span>
                     </div>
                 </div>
-                <div class="absolute -bottom-6 -left-6 rounded-2xl overflow-hidden shadow-xl border-4 border-white/10 w-48 h-32">
-                    <img src="{{ asset('images/hero/factory-workers.jpg') }}" alt="Pekerja di pabrik Jepang"
-                        class="w-full h-full object-cover">
-                </div>
-                <div class="absolute -top-4 -right-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl px-4 py-2 shadow-lg">
+
+                {{-- Badge overlay --}}
+                <div class="absolute -bottom-4 -left-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl px-4 py-2 shadow-lg">
                     <p class="text-white text-sm font-bold">1000+ Berhasil Ditempatkan</p>
                 </div>
             </div>
