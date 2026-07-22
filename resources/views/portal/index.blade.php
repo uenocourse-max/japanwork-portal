@@ -100,66 +100,65 @@
             </div>
 
             {{-- Right: Hero Carousel --}}
-            <div class="hidden lg:block relative"
-                x-data="{
-                    current: 0,
-                    total: 4,
-                    autoplay: null,
-                    slides: [
-                        { img: '{{ asset('images/hero/office-workers.jpg') }}', alt: 'Tim kerja di Jepang', caption: 'Tim Profesional', sub: 'Bergabung dengan perusahaan terkemuka di Jepang' },
-                        { img: '{{ asset('images/jobs/kaigo-tokyo.jpg') }}', alt: 'Perawat lansia di Tokyo', caption: 'Perawat Lansia (Kaigo)', sub: 'Peluang karir di bidang perawatan lansia' },
-                        { img: '{{ asset('images/jobs/construction-nagoya.jpg') }}', alt: 'Pekerja konstruksi', caption: 'Konstruksi & Infrastruktur', sub: 'Bangun masa depan di Jepang' },
-                        { img: '{{ asset('images/jobs/chef-kobe.jpg') }}', alt: 'Chef kuliner Jepang', caption: 'Kuliner Jepang', sub: 'Jadilah bagian dari industri kuliner' },
-                    ],
-                    init() {
-                        this.autoplay = setInterval(() => this.next(), 5000);
-                    },
-                    next() {
-                        this.current = (this.current + 1) % this.total;
-                    },
-                    goTo(i) {
-                        this.current = i;
-                        clearInterval(this.autoplay);
-                        this.autoplay = setInterval(() => this.next(), 5000);
-                    },
-                    pause() {
-                        clearInterval(this.autoplay);
-                    },
-                    resume() {
-                        this.autoplay = setInterval(() => this.next(), 5000);
-                    }
-                }"
-                @mouseenter="pause()" @mouseleave="resume()">
-
+            <div class="hidden lg:block relative" id="heroCarousel">
                 {{-- Slides --}}
                 <div class="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/30 h-80">
-                    <template x-for="(slide, i) in slides" :key="i">
-                        <div class="absolute inset-0 transition-opacity duration-700 ease-in-out"
-                            :class="current === i ? 'opacity-100 z-10' : 'opacity-0 z-0'">
-                            <img :src="slide.img" :alt="slide.alt" class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent"></div>
-                            <div class="absolute bottom-0 left-0 right-0 p-5">
-                                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                                    <p class="text-white font-bold text-base" x-text="slide.caption"></p>
-                                    <p class="text-blue-200/80 text-sm mt-0.5" x-text="slide.sub"></p>
-                                </div>
+                    {{-- Slide 1 --}}
+                    <div class="hero-slide absolute inset-0 opacity-100 transition-opacity duration-700 ease-in-out">
+                        <img src="{{ asset('images/hero/office-workers.jpg') }}" alt="Tim kerja di Jepang" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-5">
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                                <p class="text-white font-bold text-base">Tim Profesional</p>
+                                <p class="text-blue-200/80 text-sm mt-0.5">Bergabung dengan perusahaan terkemuka di Jepang</p>
                             </div>
                         </div>
-                    </template>
+                    </div>
+                    {{-- Slide 2 --}}
+                    <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-700 ease-in-out">
+                        <img src="{{ asset('images/jobs/kaigo-tokyo.jpg') }}" alt="Perawat lansia di Tokyo" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-5">
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                                <p class="text-white font-bold text-base">Perawat Lansia (Kaigo)</p>
+                                <p class="text-blue-200/80 text-sm mt-0.5">Peluang karir di bidang perawatan lansia</p>
+                            </div>
+                        </div>
+                    </div>
+                    {{-- Slide 3 --}}
+                    <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-700 ease-in-out">
+                        <img src="{{ asset('images/jobs/construction-nagoya.jpg') }}" alt="Pekerja konstruksi" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-5">
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                                <p class="text-white font-bold text-base">Konstruksi & Infrastruktur</p>
+                                <p class="text-blue-200/80 text-sm mt-0.5">Bangun masa depan di Jepang</p>
+                            </div>
+                        </div>
+                    </div>
+                    {{-- Slide 4 --}}
+                    <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-700 ease-in-out">
+                        <img src="{{ asset('images/jobs/chef-kobe.jpg') }}" alt="Chef kuliner Jepang" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-5">
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                                <p class="text-white font-bold text-base">Kuliner Jepang</p>
+                                <p class="text-blue-200/80 text-sm mt-0.5">Jadilah bagian dari industri kuliner</p>
+                            </div>
+                        </div>
+                    </div>
 
                     {{-- Dot indicators --}}
-                    <div class="absolute top-4 right-4 z-20 flex flex-col gap-2">
-                        <template x-for="i in total" :key="i">
-                            <button @click="goTo(i - 1)"
-                                class="w-2.5 h-2.5 rounded-full transition-all duration-300"
-                                :class="current === (i - 1) ? 'bg-white scale-110 shadow-lg shadow-white/30' : 'bg-white/40 hover:bg-white/60'">
-                            </button>
-                        </template>
+                    <div class="absolute top-4 right-4 z-20 flex flex-col gap-2" id="heroDots">
+                        <button data-slide="0" class="hero-dot w-2.5 h-2.5 rounded-full transition-all duration-300 bg-white scale-110 shadow-lg shadow-white/30"></button>
+                        <button data-slide="1" class="hero-dot w-2.5 h-2.5 rounded-full transition-all duration-300 bg-white/40 hover:bg-white/60"></button>
+                        <button data-slide="2" class="hero-dot w-2.5 h-2.5 rounded-full transition-all duration-300 bg-white/40 hover:bg-white/60"></button>
+                        <button data-slide="3" class="hero-dot w-2.5 h-2.5 rounded-full transition-all duration-300 bg-white/40 hover:bg-white/60"></button>
                     </div>
 
                     {{-- Slide counter --}}
                     <div class="absolute top-4 left-4 z-20 bg-black/30 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-white/10">
-                        <span class="text-white text-xs font-medium" x-text="(current + 1) + ' / ' + total"></span>
+                        <span class="text-white text-xs font-medium" id="heroCounter">1 / 4</span>
                     </div>
                 </div>
 
@@ -168,6 +167,63 @@
                     <p class="text-white text-sm font-bold">1000+ Berhasil Ditempatkan</p>
                 </div>
             </div>
+
+            @push('scripts')
+            <script>
+                (function () {
+                    const carousel = document.getElementById('heroCarousel');
+                    if (!carousel) return;
+
+                    const slides = carousel.querySelectorAll('.hero-slide');
+                    const dots = carousel.querySelectorAll('.hero-dot');
+                    const counter = document.getElementById('heroCounter');
+                    const total = slides.length;
+                    let current = 0;
+                    let timer = null;
+
+                    function goTo(index) {
+                        slides[current].classList.replace('opacity-100', 'opacity-0');
+                        dots[current].classList.replace('bg-white', 'bg-white/40');
+                        dots[current].classList.remove('scale-110', 'shadow-lg', 'shadow-white/30');
+
+                        current = index;
+
+                        slides[current].classList.replace('opacity-0', 'opacity-100');
+                        dots[current].classList.replace('bg-white/40', 'bg-white');
+                        dots[current].classList.add('scale-110', 'shadow-lg', 'shadow-white/30');
+                        counter.textContent = (current + 1) + ' / ' + total;
+                    }
+
+                    function next() {
+                        goTo((current + 1) % total);
+                    }
+
+                    function startAutoplay() {
+                        stopAutoplay();
+                        timer = setInterval(next, 5000);
+                    }
+
+                    function stopAutoplay() {
+                        if (timer) {
+                            clearInterval(timer);
+                            timer = null;
+                        }
+                    }
+
+                    dots.forEach(function (dot) {
+                        dot.addEventListener('click', function () {
+                            goTo(parseInt(this.dataset.slide));
+                            startAutoplay();
+                        });
+                    });
+
+                    carousel.addEventListener('mouseenter', stopAutoplay);
+                    carousel.addEventListener('mouseleave', startAutoplay);
+
+                    startAutoplay();
+                })();
+            </script>
+            @endpush
         </div>
     </div>
 </div>
