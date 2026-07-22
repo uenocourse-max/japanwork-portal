@@ -3,8 +3,6 @@
 namespace App\Filament\Recruiter\Resources\RecruiterJobListings\Tables;
 
 use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
 use Filament\Tables;
@@ -127,11 +125,6 @@ class RecruiterJobListingsTable
                         $record->update(['status' => 'open']);
                         Notification::make()->title('Lowongan dibuka kembali')->success()->send();
                     }),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
             ]);
     }
 }

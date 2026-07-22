@@ -10,15 +10,9 @@ use Illuminate\Http\Request;
 
 class JobController extends Controller
 {
-    private function availableScope($query)
-    {
-        return $query->where('status', 'open')
-            ->where(fn ($q) => $q->whereNull('deadline')->orWhere('deadline', '>=', now()));
-    }
-
     public function index(Request $request)
     {
-        $query = $this->availableScope(JobListing::query())
+        $query = JobListing::query()->available()
             ->with('sswCategory')
             ->withCount('applications');
 
@@ -49,7 +43,7 @@ class JobController extends Controller
 
         $jobs = $query->latest()->paginate(12)->withQueryString();
 
-        $sswCategories = SswCategory::orderBy('name')->withCount(['jobListings' => fn ($q) => $this->availableScope($q)])->get();
+        $sswCategories = SswCategory::orderBy('name')->withCount(['jobListings' => fn ($q) => $q->available()])->get();
 
         $savedJobIds = auth()->user()->student->savedJobs()->pluck('job_listing_id');
 
@@ -76,7 +70,7 @@ class JobController extends Controller
 
         $hasApplied = (bool) $application;
         $sswMismatch = $student && $job->job_type === 'tg' && ! $student->hasSswCategory($job->ssw_category_id);
-        $isSaved = $student->savedJobs()->where('job_listing_id', $job->id)->exists();
+        $isSaved = $student && $student->savedJobs()->where('job_listing_id', $job->id)->exists();
 
         return view('student.jobs.show', compact('job', 'hasApplied', 'application', 'sswMismatch', 'isSaved'));
     }

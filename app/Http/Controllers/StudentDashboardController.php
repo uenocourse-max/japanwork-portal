@@ -12,22 +12,21 @@ class StudentDashboardController extends Controller
         $user = Auth::user();
         $student = $user->student;
 
-        $applications = JobApplication::where('student_id', $student->id)
-            ->with('jobListing.sswCategory')
-            ->latest('applied_at')
-            ->get();
-
         $stats = [
-            'total' => $applications->count(),
-            'pending' => $applications->where('status', 'pending')->count(),
-            'reviewed' => $applications->where('status', 'reviewed')->count(),
-            'accepted' => $applications->where('status', 'accepted')->count(),
-            'interview_scheduled' => $applications->where('status', 'interview_scheduled')->count(),
-            'company_accepted' => $applications->where('status', 'company_accepted')->count(),
-            'not_passed' => $applications->where('status', 'not_passed')->count(),
+            'total' => JobApplication::where('student_id', $student->id)->count(),
+            'pending' => JobApplication::where('student_id', $student->id)->where('status', 'pending')->count(),
+            'reviewed' => JobApplication::where('student_id', $student->id)->where('status', 'reviewed')->count(),
+            'accepted' => JobApplication::where('student_id', $student->id)->where('status', 'accepted')->count(),
+            'interview_scheduled' => JobApplication::where('student_id', $student->id)->where('status', 'interview_scheduled')->count(),
+            'company_accepted' => JobApplication::where('student_id', $student->id)->where('status', 'company_accepted')->count(),
+            'not_passed' => JobApplication::where('student_id', $student->id)->where('status', 'not_passed')->count(),
         ];
 
-        $recentApplications = $applications->take(5);
+        $recentApplications = JobApplication::where('student_id', $student->id)
+            ->with('jobListing.sswCategory')
+            ->latest('applied_at')
+            ->limit(5)
+            ->get();
 
         $unreadNotifications = $user->unreadNotifications->count();
 

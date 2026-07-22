@@ -70,6 +70,6 @@ class User extends Authenticatable implements FilamentUser
             return $this->isRecruiter();
         }
 
-        return true;
+        return false;
     }
 }

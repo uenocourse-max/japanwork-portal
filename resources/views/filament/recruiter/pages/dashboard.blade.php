@@ -8,66 +8,142 @@
         </p>
     </div>
 
+    {{-- Quick Actions --}}
+    <div class="mb-6 flex flex-wrap gap-3">
+        <x-filament::button
+            tag="a"
+            :href="\App\Filament\Recruiter\Resources\RecruiterJobListingResource::getUrl('create')"
+            icon="heroicon-m-plus"
+            size="sm"
+        >
+            Buat Lowongan Baru
+        </x-filament::button>
+        <x-filament::button
+            tag="a"
+            :href="\App\Filament\Recruiter\Resources\RecruiterApplicationResource::getUrl('index')"
+            icon="heroicon-m-clipboard-document-list"
+            color="gray"
+            size="sm"
+        >
+            Lihat Semua Lamaran
+        </x-filament::button>
+        <x-filament::button
+            tag="a"
+            :href="\App\Filament\Recruiter\Resources\RecruiterJobListingResource::getUrl('index')"
+            icon="heroicon-m-briefcase"
+            color="gray"
+            size="sm"
+        >
+            Kelola Lowongan
+        </x-filament::button>
+    </div>
+
+    {{-- Stats Overview --}}
     @livewire(\App\Filament\Recruiter\Widgets\RecruiterStatsOverview::class)
 
+    {{-- Charts Row --}}
+    <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        @livewire(\App\Filament\Recruiter\Widgets\RecruiterApplicationsChart::class)
+        @livewire(\App\Filament\Recruiter\Widgets\RecruiterApplicationsTrendChart::class)
+    </div>
+
+    {{-- Data Tables Row --}}
+    <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        @livewire(\App\Filament\Recruiter\Widgets\RecruiterUpcomingInterviewsWidget::class)
+        @livewire(\App\Filament\Recruiter\Widgets\RecruiterTopJobsWidget::class)
+    </div>
+
+    {{-- Recent Applications --}}
     @php
-        $recentApplications = $this->getRecentApplications();
-        $myRecentJobs = $this->getMyRecentJobs();
+        $recentApplications = \App\Models\JobApplication::whereHas('jobListing', fn ($q) => $q->where('posted_by', auth()->id()))
+            ->with('student', 'jobListing')
+            ->latest('applied_at')
+            ->limit(8)
+            ->get();
     @endphp
 
-    <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div class="mt-8">
         <x-filament::section>
             <x-slot name="heading">Lamaran Terbaru</x-slot>
+            <x-slot name="description">8 lamaran terakhir yang masuk</x-slot>
 
-            @forelse ($recentApplications as $application)
-                <div class="flex items-center justify-between py-3 {{ $loop->last ? '' : 'border-b border-gray-200 dark:border-white/10' }}">
-                    <div class="min-w-0 flex-1">
-                        <p class="truncate text-sm font-medium text-gray-900 dark:text-white">
-                            {{ $application->student->full_name ?? '-' }}
-                        </p>
-                        <p class="truncate text-xs text-gray-500 dark:text-gray-400">
-                            {{ $application->jobListing->title ?? '-' }}
-                        </p>
-                    </div>
-                    <x-filament::badge :color="match($application->status) {
-                        'pending' => 'warning',
-                        'reviewed' => 'info',
-                        'accepted' => 'success',
-                        'rejected' => 'danger',
-                        default => 'gray',
-                    }">
-                        {{ ucfirst($application->status) }}
-                    </x-filament::badge>
+            @if ($recentApplications->isNotEmpty())
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-200 dark:border-white/10">
+                                <th class="pb-3 font-medium text-gray-500 dark:text-gray-400">Siswa</th>
+                                <th class="pb-3 font-medium text-gray-500 dark:text-gray-400">Lowongan</th>
+                                <th class="pb-3 font-medium text-gray-500 dark:text-gray-400">JLPT</th>
+                                <th class="pb-3 font-medium text-gray-500 dark:text-gray-400">Status</th>
+                                <th class="pb-3 font-medium text-gray-500 dark:text-gray-400">Tanggal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-white/10">
+                            @foreach ($recentApplications as $application)
+                                <tr class="group">
+                                    <td class="py-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-50 text-xs font-medium text-primary-700 dark:bg-primary-500/10 dark:text-primary-400">
+                                                {{ strtoupper(substr($application->student->full_name ?? 'N', 0, 2)) }}
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900 dark:text-white">{{ $application->student->full_name ?? '-' }}</p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $application->student->phone ?? '-' }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <p class="text-gray-900 dark:text-white">{{ $application->jobListing->title ?? '-' }}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $application->jobListing->location ?? '-' }}</p>
+                                    </td>
+                                    <td class="py-3">
+                                        @if ($application->student?->jlpt_level)
+                                            <x-filament::badge size="sm" color="info">
+                                                {{ $application->student->jlpt_level }}
+                                            </x-filament::badge>
+                                        @else
+                                            <span class="text-xs text-gray-400">-</span>
+                                        @endif
+                                    </td>
+                                    <td class="py-3">
+                                        <x-filament::badge :color="match($application->status) {
+                                            'pending' => 'warning',
+                                            'reviewed' => 'info',
+                                            'accepted' => 'success',
+                                            'interview_scheduled' => 'info',
+                                            'company_accepted' => 'success',
+                                            'not_passed' => 'danger',
+                                            'rejected' => 'danger',
+                                            'withdrawn' => 'gray',
+                                            default => 'gray',
+                                        }">
+                                            {{ match($application->status) {
+                                                'pending' => 'Menunggu',
+                                                'reviewed' => 'Direview',
+                                                'accepted' => 'Diterima',
+                                                'interview_scheduled' => 'Interview',
+                                                'company_accepted' => 'Diterima Perusahaan',
+                                                'not_passed' => 'Tidak Lolos',
+                                                'rejected' => 'Ditolak',
+                                                'withdrawn' => 'Ditarik',
+                                                default => ucfirst($application->status),
+                                            } }}
+                                        </x-filament::badge>
+                                    </td>
+                                    <td class="py-3 text-xs text-gray-500 dark:text-gray-400">
+                                        {{ $application->applied_at?->diffForHumans() ?? '-' }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-            @empty
+            @else
                 <p class="py-6 text-center text-sm text-gray-500 dark:text-gray-400">
                     Belum ada lamaran masuk.
                 </p>
-            @endforelse
-        </x-filament::section>
-
-        <x-filament::section>
-            <x-slot name="heading">Lowongan Saya</x-slot>
-
-            @forelse ($myRecentJobs as $job)
-                <div class="flex items-center justify-between py-3 {{ $loop->last ? '' : 'border-b border-gray-200 dark:border-white/10' }}">
-                    <div class="min-w-0 flex-1">
-                        <p class="truncate text-sm font-medium text-gray-900 dark:text-white">
-                            {{ $job->title }}
-                        </p>
-                        <p class="truncate text-xs text-gray-500 dark:text-gray-400">
-                            {{ $job->applications_count }} lamaran · {{ ucfirst($job->status) }}
-                        </p>
-                    </div>
-                    <x-filament::link :href="\App\Filament\Recruiter\Resources\RecruiterJobListingResource::getUrl('edit', ['record' => $job->id])">
-                        Edit
-                    </x-filament::link>
-                </div>
-            @empty
-                <p class="py-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                    Belum ada lowongan. <a href="{{ \App\Filament\Recruiter\Resources\RecruiterJobListingResource::getUrl('create') }}" class="text-primary-600 hover:underline">Buat sekarang</a>
-                </p>
-            @endforelse
+            @endif
         </x-filament::section>
     </div>
 </x-filament-panels::page>

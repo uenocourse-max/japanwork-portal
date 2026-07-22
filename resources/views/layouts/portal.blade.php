@@ -87,10 +87,12 @@
                 <div>
                     <h4 class="text-white font-semibold text-sm mb-3">Kategori Populer</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="{{ route('portal.index', ['ssw_category_id' => 1]) }}" class="hover:text-white transition">Kaigo (Perawatan)</a></li>
-                        <li><a href="{{ route('portal.index', ['ssw_category_id' => 2]) }}" class="hover:text-white transition">Food Service</a></li>
-                        <li><a href="{{ route('portal.index', ['ssw_category_id' => 6]) }}" class="hover:text-white transition">Building Cleaning</a></li>
-                        <li><a href="{{ route('portal.index', ['ssw_category_id' => 7]) }}" class="hover:text-white transition">Hotel</a></li>
+                        @php
+                            $footerCategories = \App\Models\SswCategory::orderBy('name')->limit(4)->get();
+                        @endphp
+                        @foreach ($footerCategories as $cat)
+                            <li><a href="{{ route('portal.index', ['ssw_category_id' => $cat->id]) }}" class="hover:text-white transition">{{ $cat->name }}</a></li>
+                        @endforeach
                     </ul>
                 </div>
                 <div>

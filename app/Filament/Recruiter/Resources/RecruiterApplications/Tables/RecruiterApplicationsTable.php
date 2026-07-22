@@ -5,8 +5,6 @@ namespace App\Filament\Recruiter\Resources\RecruiterApplications\Tables;
 use App\Models\JobApplication;
 use App\Notifications\ApplicationStatusChanged;
 use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
@@ -524,11 +522,6 @@ class RecruiterApplicationsTable
                         ]);
                         self::notifyStatusChange($record->fresh(), $oldStatus);
                     }),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
             ]);
     }
 }

@@ -9,18 +9,11 @@ use Illuminate\Support\Facades\Auth;
 
 class JobPortalController extends Controller
 {
-    private function availableScope($query)
-    {
-        return $query->where('status', 'open')
-            ->where(fn ($q) => $q->whereNull('deadline')->orWhere('deadline', '>=', now()));
-    }
-
     public function index(Request $request)
     {
-        $query = $this->availableScope(JobListing::query())
+        $query = JobListing::query()->available()
             ->with('sswCategory', 'poster')
-            ->withCount('applications')
-            ->latest();
+            ->withCount('applications');
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -49,7 +42,7 @@ class JobPortalController extends Controller
 
         $jobs = $query->latest()->paginate(12)->withQueryString();
 
-        $sswCategories = SswCategory::orderBy('name')->withCount(['jobListings' => fn ($q) => $this->availableScope($q)])->get();
+        $sswCategories = SswCategory::orderBy('name')->withCount(['jobListings' => fn ($q) => $q->available()])->get();
 
         $totalJobs = $sswCategories->sum('job_listings_count');
 
@@ -65,7 +58,7 @@ class JobPortalController extends Controller
         $job->loadCount('applications');
         $job->load('sswCategory', 'poster');
 
-        $relatedJobs = $this->availableScope(JobListing::where('id', '!=', $job->id))
+        $relatedJobs = JobListing::query()->available()->where('id', '!=', $job->id)
             ->where(function ($q) use ($job) {
                 $q->where('ssw_category_id', $job->ssw_category_id)
                     ->orWhereRaw('LOWER(location) LIKE ?', ['%'.mb_strtolower($job->location).'%']);

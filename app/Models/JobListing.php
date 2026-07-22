@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\JobListingFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -61,6 +62,12 @@ class JobListing extends Model
     public function savedByStudents(): HasMany
     {
         return $this->hasMany(SavedJob::class);
+    }
+
+    public function scopeAvailable(Builder $query): Builder
+    {
+        return $query->where('status', 'open')
+            ->where(fn ($q) => $q->whereNull('deadline')->orWhere('deadline', '>=', now()));
     }
 
     public function getThumbnailDisplayUrlAttribute(): ?string

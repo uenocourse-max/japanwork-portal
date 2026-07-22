@@ -384,7 +384,7 @@
                     <a href="{{ route('portal.index', ['ssw_category_id' => $category->id]) }}"
                        class="flex items-center justify-between px-3 py-2 rounded-lg text-sm {{ request('ssw_category_id') == $category->id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-50' }} transition">
                         <span>{{ $category->name }}</span>
-                        <span class="text-xs text-gray-400">{{ $category->jobListings()->where('status', 'open')->count() }}</span>
+                        <span class="text-xs text-gray-400">{{ $category->job_listings_count }}</span>
                     </a>
                 @endforeach
             </div>

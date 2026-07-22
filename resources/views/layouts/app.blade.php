@@ -20,8 +20,9 @@
             </div>
             <div class="flex items-center gap-4">
                 @php
-                    $unreadCount = Auth::user()->unreadNotifications->count();
-                    $notifications = Auth::user()->notifications()->latest()->limit(10)->get();
+                    $user = Auth::user();
+                    $unreadCount = $user->notifications()->whereNull('read_at')->count();
+                    $notifications = $user->notifications()->latest()->limit(10)->get();
                 @endphp
                 <div class="relative">
                     <button onclick="document.getElementById('notif-dropdown').classList.toggle('hidden')" class="relative text-gray-600 hover:text-amber-600">

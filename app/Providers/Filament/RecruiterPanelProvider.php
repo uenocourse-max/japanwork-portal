@@ -3,7 +3,11 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Recruiter\Pages\Dashboard;
+use App\Filament\Recruiter\Widgets\RecruiterApplicationsChart;
+use App\Filament\Recruiter\Widgets\RecruiterApplicationsTrendChart;
 use App\Filament\Recruiter\Widgets\RecruiterStatsOverview;
+use App\Filament\Recruiter\Widgets\RecruiterTopJobsWidget;
+use App\Filament\Recruiter\Widgets\RecruiterUpcomingInterviewsWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -37,6 +41,10 @@ class RecruiterPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Recruiter/Widgets'), for: 'App\Filament\Recruiter\Widgets')
             ->widgets([
                 RecruiterStatsOverview::class,
+                RecruiterApplicationsChart::class,
+                RecruiterApplicationsTrendChart::class,
+                RecruiterUpcomingInterviewsWidget::class,
+                RecruiterTopJobsWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

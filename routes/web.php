@@ -24,16 +24,18 @@ Route::post('/jobs/{job}/apply', [JobController::class, 'apply'])
     ->name('portal.apply')
     ->middleware(['auth', EnsureStudentProfileComplete::class]);
 
-Route::middleware('guest')->group(function () {
+Route::middleware(['guest', 'throttle:10,1'])->group(function () {
     Route::get('/register', [StudentRegisterController::class, 'showRegistrationForm'])->name('student.register');
     Route::post('/register', [StudentRegisterController::class, 'register'])->name('student.register.store');
     Route::get('/login', [StudentLoginController::class, 'showLoginForm'])->name('student.login');
     Route::post('/login', [StudentLoginController::class, 'login'])->name('student.login.store');
 
-    Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-    Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-    Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
+    Route::middleware('throttle:5,1')->group(function () {
+        Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+        Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+        Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+        Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
+    });
 });
 
 Route::post('/logout', [StudentLoginController::class, 'logout'])->name('student.logout')->middleware('auth');

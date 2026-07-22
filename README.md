@@ -13,7 +13,14 @@ Portal lowongan kerja ke Jepang untuk siswa Indonesia yang ingin mengikuti progr
 - Manajemen 9 kategori SSW
 
 ### Recruiter (`/recruiter`)
-- Dashboard statistik lowongan & lamaran milik sendiri
+- Dashboard lengkap dengan:
+  - 7 kartu statistik (total lowongan, aktif, total lamaran, menunggu review, diterima, jadwal interview, diterima perusahaan)
+  - Quick action buttons (Buat Lowongan, Lihat Semua Lamaran, Kelola Lowongan)
+  - Doughnut chart distribusi status lamaran
+  - Line chart tren lamaran masuk (30 hari terakhir)
+  - Tabel interview mendatang (tanggal, tipe, lokasi)
+  - Tabel performa lowongan (berdasarkan jumlah pelamar)
+  - Tabel lamaran terbaru dengan avatar, JLPT, status badge, dan tanggal
 - Kelola lowongan (scoped ke user login)
 - Review pelamar dengan modal profil lengkap dan action inline
 - Penjadwalan interview (online/offline)
@@ -172,6 +179,24 @@ php artisan test tests/Feature/JobControllerTest.php
 ### Database (17 Tabel)
 
 `users`, `students`, `ssw_categories`, `student_ssw_category`, `lpk_tsks`, `job_listings`, `job_applications`, `saved_jobs`, `notifications`, `sessions`, `cache`, `cache_locks`, `password_reset_tokens`, `jobs`, `job_batches`, `failed_jobs`, `migrations`
+
+### Filament Widgets
+
+**Admin Panel (7 widgets):**
+- `StudentStatsOverview` — Statistik siswa (total, matched, proses matching, menunggu hasil, belum matching)
+- `ApplicationStatsOverview` — Statistik lamaran (total, menunggu, interview, diterima perusahaan)
+- `MatchingChart` — Doughnut chart status matching
+- `JlptChart` — Bar chart distribusi JLPT
+- `JobsBySswChart` — Bar chart lowongan per kategori SSW
+- `SswChart` — Bar chart siswa per kategori SSW
+- `PathwayChart` — Pie chart distribusi jalur (Mandiri/LPK)
+
+**Recruiter Panel (5 widgets):**
+- `RecruiterStatsOverview` — 7 kartu statistik pribadi
+- `RecruiterApplicationsChart` — Doughnut chart status lamaran
+- `RecruiterApplicationsTrendChart` — Line chart tren lamaran (30 hari)
+- `RecruiterTopJobsWidget` — Tabel performa lowongan
+- `RecruiterUpcomingInterviewsWidget` — Tabel interview mendatang
 
 ### Scheduled Command
 
