@@ -78,6 +78,6 @@ class EnsureStudentProfileCompleteTest extends TestCase
 
         $response = $this->actingAs($admin)->get(route('student.dashboard'));
 
-        $response->assertStatus(200);
+        $response->assertStatus(403);
     }
 }

@@ -12,6 +12,10 @@ class StudentDashboardController extends Controller
         $user = Auth::user();
         $student = $user->student;
 
+        if (! $student) {
+            abort(403, 'Akses ditolak.');
+        }
+
         $stats = [
             'total' => JobApplication::where('student_id', $student->id)->count(),
             'pending' => JobApplication::where('student_id', $student->id)->where('status', 'pending')->count(),

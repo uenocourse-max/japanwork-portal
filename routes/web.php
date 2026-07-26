@@ -24,7 +24,7 @@ Route::post('/jobs/{job}/apply', [JobController::class, 'apply'])
     ->name('portal.apply')
     ->middleware(['auth', EnsureStudentProfileComplete::class]);
 
-Route::middleware(['guest', 'throttle:10,1'])->group(function () {
+Route::middleware(['throttle:10,1'])->group(function () {
     Route::get('/register', [StudentRegisterController::class, 'showRegistrationForm'])->name('student.register');
     Route::post('/register', [StudentRegisterController::class, 'register'])->name('student.register.store');
     Route::get('/login', [StudentLoginController::class, 'showLoginForm'])->name('student.login');

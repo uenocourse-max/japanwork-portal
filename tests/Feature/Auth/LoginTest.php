@@ -24,7 +24,7 @@ class LoginTest extends TestCase
         $response = $this->get(route('student.login'));
 
         $response->assertStatus(200);
-        $response->assertSee('Masuk');
+        $response->assertSee('Login Siswa');
     }
 
     public function test_student_can_login(): void

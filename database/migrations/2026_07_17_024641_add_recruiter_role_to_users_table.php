@@ -18,6 +18,12 @@ return new class extends Migration
         if (DB::getDriverName() === 'pgsql') {
             DB::statement('ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check');
             DB::statement("ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('admin', 'student', 'recruiter'))");
+        } elseif (DB::getDriverName() === 'sqlite') {
+            DB::statement('CREATE TEMPORARY TABLE users_backup AS SELECT * FROM users');
+            DB::statement('DROP TABLE users');
+            DB::statement("CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR NOT NULL, role VARCHAR NOT NULL DEFAULT 'student', phone_number VARCHAR NULL, company_name VARCHAR NULL, location VARCHAR NULL, email VARCHAR UNIQUE NOT NULL, email_verified_at TIMESTAMP NULL, password VARCHAR NOT NULL, remember_token VARCHAR NULL, created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL)");
+            DB::statement('INSERT INTO users SELECT * FROM users_backup');
+            DB::statement('DROP TABLE users_backup');
         }
     }
 
@@ -30,6 +36,12 @@ return new class extends Migration
         if (DB::getDriverName() === 'pgsql') {
             DB::statement('ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check');
             DB::statement("ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('admin', 'student'))");
+        } elseif (DB::getDriverName() === 'sqlite') {
+            DB::statement('CREATE TEMPORARY TABLE users_backup AS SELECT * FROM users');
+            DB::statement('DROP TABLE users');
+            DB::statement("CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR NOT NULL, role VARCHAR NOT NULL DEFAULT 'student', email VARCHAR UNIQUE NOT NULL, email_verified_at TIMESTAMP NULL, password VARCHAR NOT NULL, remember_token VARCHAR NULL, created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL)");
+            DB::statement('INSERT INTO users SELECT * FROM users_backup');
+            DB::statement('DROP TABLE users_backup');
         }
     }
 };
