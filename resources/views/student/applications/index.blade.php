@@ -21,11 +21,11 @@
                         <div class="ml-4">
                             @php
                                 $statusConfig = [
-                                    'pending' => ['label' => 'Menunggu', 'class' => 'bg-gray-100 text-gray-800'],
-                                    'reviewed' => ['label' => 'Sudah Direview', 'class' => 'bg-blue-100 text-blue-800'],
+                                    'pending' => ['label' => 'Menunggu', 'class' => 'bg-yellow-100 text-yellow-800'],
+                                    'reviewed' => ['label' => 'Sudah Direview', 'class' => 'bg-yellow-100 text-yellow-800'],
                                     'accepted' => ['label' => 'Diterima', 'class' => 'bg-green-100 text-green-800'],
-                                    'interview_scheduled' => ['label' => 'Jadwal Interview', 'class' => 'bg-yellow-100 text-yellow-800'],
-                                    'company_accepted' => ['label' => 'Diterima Perusahaan', 'class' => 'bg-green-100 text-green-800'],
+                                    'interview_scheduled' => ['label' => 'Jadwal Interview', 'class' => 'bg-orange-100 text-orange-800'],
+                                    'company_accepted' => ['label' => 'Diterima Perusahaan', 'class' => 'bg-blue-100 text-blue-800'],
                                     'not_passed' => ['label' => 'Tidak Lolos', 'class' => 'bg-red-100 text-red-800'],
                                     'rejected' => ['label' => 'Ditolak', 'class' => 'bg-red-100 text-red-800'],
                                     'withdrawn' => ['label' => 'Ditarik', 'class' => 'bg-gray-100 text-gray-500'],
@@ -42,6 +42,21 @@
                             $timelineStatuses = ['pending', 'reviewed', 'accepted', 'interview_scheduled', 'company_accepted'];
                             $currentIndex = array_search($application->status, $timelineStatuses);
                             $isTerminal = in_array($application->status, ['rejected', 'not_passed', 'withdrawn']);
+
+                            $stepColors = [
+                                'pending' => ['active' => 'bg-yellow-400', 'line' => 'bg-yellow-400', 'text' => 'text-yellow-600', 'ring' => 'ring-yellow-200'],
+                                'reviewed' => ['active' => 'bg-yellow-500', 'line' => 'bg-yellow-500', 'text' => 'text-yellow-600', 'ring' => 'ring-yellow-200'],
+                                'accepted' => ['active' => 'bg-green-500', 'line' => 'bg-green-500', 'text' => 'text-green-600', 'ring' => 'ring-green-200'],
+                                'interview_scheduled' => ['active' => 'bg-orange-500', 'line' => 'bg-orange-500', 'text' => 'text-orange-600', 'ring' => 'ring-orange-200'],
+                                'company_accepted' => ['active' => 'bg-blue-500', 'line' => 'bg-blue-500', 'text' => 'text-blue-600', 'ring' => 'ring-blue-200'],
+                            ];
+                            $stepLabels = [
+                                'pending' => 'Menunggu',
+                                'reviewed' => 'Direview',
+                                'accepted' => 'Diterima',
+                                'interview_scheduled' => 'Interview',
+                                'company_accepted' => 'Lolos',
+                            ];
                         @endphp
                         @if ($isTerminal)
                             <div class="flex items-center gap-2 text-sm text-red-600">
@@ -55,35 +70,49 @@
                                 </span>
                             </div>
                         @elseif ($currentIndex !== false)
-                            <div class="flex items-center gap-1 text-xs">
+                            @php $currentStepColor = $stepColors[$timelineStatuses[$currentIndex]] ?? ['active' => 'bg-yellow-400', 'text' => 'text-yellow-600', 'ring' => 'ring-yellow-200']; @endphp
+                            {{-- Dots + Lines --}}
+                            <div class="relative flex items-center">
                                 @foreach ($timelineStatuses as $i => $s)
                                     @php
                                         $isActive = $i <= $currentIndex;
                                         $isCurrent = $i === $currentIndex;
+                                        $color = $stepColors[$s];
+                                        $position = ($i / (count($timelineStatuses) - 1)) * 100;
                                     @endphp
-                                    <div class="flex items-center">
-                                        <div class="w-3 h-3 rounded-full {{ $isActive ? 'bg-amber-500' : 'bg-gray-300' }} {{ $isCurrent ? 'ring-2 ring-amber-300' : '' }}"></div>
-                                        @if ($i < count($timelineStatuses) - 1)
-                                            <div class="w-6 h-0.5 {{ $i < $currentIndex ? 'bg-amber-500' : 'bg-gray-300' }}"></div>
-                                        @endif
+                                    {{-- Dot --}}
+                                    <div class="absolute z-10" style="left: {{ $position }}%; transform: translateX(-50%);">
+                                        <div class="w-4 h-4 rounded-full {{ $isActive ? $color['active'] : 'bg-gray-300' }} {{ $isCurrent ? 'ring-4 ' . $color['ring'] . ' scale-110' : '' }} transition-all"></div>
                                     </div>
+                                    {{-- Line --}}
+                                    @if ($i < count($timelineStatuses) - 1)
+                                        @php
+                                            $nextIsActive = ($i + 1) <= $currentIndex;
+                                            $nextColor = $stepColors[$timelineStatuses[$i + 1]];
+                                            $nextPosition = (($i + 1) / (count($timelineStatuses) - 1)) * 100;
+                                        @endphp
+                                        <div class="absolute h-1 {{ $nextIsActive ? $nextColor['line'] : 'bg-gray-300' }}"
+                                            style="left: {{ $position }}%; width: {{ $nextPosition - $position }}%;"></div>
+                                    @endif
                                 @endforeach
+                                {{-- Spacer for height --}}
+                                <div class="w-4 h-4"></div>
                             </div>
-                            <div class="flex items-center gap-4 mt-1 text-xs text-gray-500">
+                            {{-- Labels --}}
+                            <div class="relative flex items-start mt-2">
                                 @foreach ($timelineStatuses as $i => $s)
                                     @php
                                         $isActive = $i <= $currentIndex;
+                                        $color = $stepColors[$s];
+                                        $position = ($i / (count($timelineStatuses) - 1)) * 100;
                                     @endphp
-                                    <span class="{{ $isActive ? 'text-amber-600 font-medium' : '' }}">
-                                        {{ match($s) {
-                                            'pending' => 'Menunggu',
-                                            'reviewed' => 'Direview',
-                                            'accepted' => 'Diterima',
-                                            'interview_scheduled' => 'Interview',
-                                            'company_accepted' => 'Lolos',
-                                        } }}
-                                    </span>
+                                    <div class="absolute text-center" style="left: {{ $position }}%; transform: translateX(-50%); width: 80px;">
+                                        <span class="text-[10px] leading-tight {{ $isActive ? $color['text'] . ' font-semibold' : 'text-gray-400' }}">
+                                            {{ $stepLabels[$s] }}
+                                        </span>
+                                    </div>
                                 @endforeach
+                                <div class="w-full h-4"></div>
                             </div>
                         @endif
                     </div>
