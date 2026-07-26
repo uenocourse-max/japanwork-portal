@@ -4,6 +4,8 @@ namespace App\Filament\Resources\Applications\Tables;
 
 use App\Models\JobApplication;
 use App\Notifications\ApplicationStatusChanged;
+use App\Notifications\InterviewScheduleChanged;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -188,6 +190,63 @@ class ApplicationsTable
                             'interview_notes' => $data['interview_notes'],
                         ]);
                         self::notifyStatusChange($record->fresh(), $oldStatus);
+                    }),
+
+                Action::make('edit_interview')
+                    ->label('Edit Jadwal')
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('primary')
+                    ->modalHeading('Edit Jadwal Interview')
+                    ->modalDescription('Ubah detail jadwal interview yang sudah dijadwalkan.')
+                    ->visible(fn ($record): bool => $record->status === 'interview_scheduled')
+                    ->form(fn (JobApplication $record): array => [
+                        Select::make('interview_type')
+                            ->label('Jenis Interview')
+                            ->options(['online' => 'Online (Meeting)', 'offline' => 'Langsung'])
+                            ->required()
+                            ->default($record->interview_type),
+                        DateTimePicker::make('interview_date')
+                            ->label('Tanggal & Waktu')
+                            ->required()
+                            ->native(false)
+                            ->minutesStep(15)
+                            ->default($record->interview_date),
+                        TextInput::make('interview_location')
+                            ->label('Lokasi / Link Meeting')
+                            ->required()
+                            ->maxLength(255)
+                            ->default($record->interview_location),
+                        Textarea::make('interview_notes')
+                            ->label('Catatan')
+                            ->rows(2)
+                            ->default($record->interview_notes),
+                    ])
+                    ->action(function ($record, array $data): void {
+                        $oldSchedule = [
+                            'interview_type' => $record->interview_type,
+                            'interview_date' => $record->interview_date?->format('d M Y H:i'),
+                            'interview_location' => $record->interview_location,
+                            'interview_notes' => $record->interview_notes,
+                        ];
+
+                        $record->update([
+                            'interview_type' => $data['interview_type'],
+                            'interview_date' => $data['interview_date'],
+                            'interview_location' => $data['interview_location'],
+                            'interview_notes' => $data['interview_notes'],
+                        ]);
+
+                        $newSchedule = [
+                            'interview_type' => $data['interview_type'],
+                            'interview_date' => Carbon::parse($data['interview_date'])->format('d M Y H:i'),
+                            'interview_location' => $data['interview_location'],
+                            'interview_notes' => $data['interview_notes'],
+                        ];
+
+                        $studentUser = $record->fresh()->student?->user;
+                        if ($studentUser) {
+                            $studentUser->notify(new InterviewScheduleChanged($record->fresh(), $oldSchedule, $newSchedule));
+                        }
                     }),
 
                 Action::make('input_result')

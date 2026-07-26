@@ -29,6 +29,20 @@
                             <p class="text-xs text-gray-500 mt-1">
                                 → <span class="font-medium">{{ $data['status_label'] }}</span>
                             </p>
+                        @elseif (($data['type'] ?? '') === 'interview_schedule_changed')
+                            <p class="text-sm text-gray-800">
+                                Jadwal interview untuk <strong>{{ $data['job_title'] }}</strong> diubah.
+                            </p>
+                            <div class="mt-2 text-xs text-gray-600 space-y-1">
+                                <div class="flex gap-2">
+                                    <span class="font-medium text-gray-500 w-16">Sebelum:</span>
+                                    <span>{{ $data['old_type'] }} • {{ $data['old_date'] }} • {{ $data['old_location'] }}</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <span class="font-medium text-amber-600 w-16">Sekarang:</span>
+                                    <span class="text-amber-700">{{ $data['new_type'] }} • {{ $data['new_date'] }} • {{ $data['new_location'] }}</span>
+                                </div>
+                            </div>
                         @elseif (($data['type'] ?? '') === 'new_application_received')
                             <p class="text-sm text-gray-800">
                                 Lamaran baru dari <strong>{{ $data['student_name'] }}</strong> untuk <strong>{{ $data['job_title'] }}</strong>.
