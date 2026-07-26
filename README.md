@@ -11,10 +11,11 @@ Portal lowongan kerja ke Jepang untuk siswa Indonesia yang ingin mengikuti progr
 - Manajemen lamaran dengan workflow lengkap
 - CRUD LPK/TSK (otomatis membuat akun recruiter)
 - Manajemen 9 kategori SSW
+- Manajemen akun pengguna (CRUD, reset password, ubah role)
 
 ### Recruiter (`/recruiter`)
 - Dashboard lengkap dengan:
-  - 7 kartu statistik (total lowongan, aktif, total lamaran, menunggu review, diterima, jadwal interview, diterima perusahaan)
+  - 8 kartu statistik (total lowongan, aktif, total lamaran, menunggu review, diterima, jadwal interview, diterima perusahaan, ditarik)
   - Quick action buttons (Buat Lowongan, Lihat Semua Lamaran, Kelola Lowongan)
   - Doughnut chart distribusi status lamaran
   - Line chart tren lamaran masuk (30 hari terakhir)
@@ -24,6 +25,8 @@ Portal lowongan kerja ke Jepang untuk siswa Indonesia yang ingin mengikuti progr
 - Kelola lowongan (scoped ke user login)
 - Review pelamar dengan modal profil lengkap dan action inline
 - Penjadwalan interview (online/offline)
+- Edit jadwal interview (dengan notifikasi otomatis ke siswa)
+- Profil akun (edit nama, email, password, info perusahaan)
 - Notifikasi otomatis ke siswa setiap perubahan status
 
 ### Student (`/student` + portal publik `/jobs`)
@@ -40,6 +43,8 @@ Portal lowongan kerja ke Jepang untuk siswa Indonesia yang ingin mengikuti progr
 ### Portal Publik
 - Browse lowongan tanpa autentikasi
 - Search & filter, 4 mode tampilan
+- Sidebar "Lowongan Favorit" (top 5 berdasarkan jumlah pelamar)
+- Custom error pages (404, 403, 500)
 
 ### Sistem Lamaran
 ```
@@ -50,6 +55,12 @@ pending → reviewed → accepted → interview_scheduled → company_accepted (
   │           └── rejected
   └── withdrawn (oleh siswa, hanya dari pending)
 ```
+
+### Keamanan
+- Role `role` tidak termasuk dalam Fillable — hanya bisa diubah melalui admin panel
+- Route apply hanya bisa diakses oleh siswa yang sudah melengkapi profil
+- Rate limiting pada login dan registrasi
+- Custom error pages (404, 403, 500)
 
 ## Tech Stack
 
@@ -136,13 +147,13 @@ Aplikasi menggunakan PHPUnit 12 dengan SQLite in-memory untuk pengujian.
 
 ```bash
 # Jalankan semua test
-php artisan test
+php artisan test --compact
 
 # Jalankan test tertentu
-php artisan test --filter=JobControllerTest
+php artisan test --compact --filter=JobControllerTest
 
 # Jalankan test di file tertentu
-php artisan test tests/Feature/JobControllerTest.php
+php artisan test --compact tests/Feature/JobControllerTest.php
 ```
 
 ## Project Structure
@@ -152,9 +163,9 @@ php artisan test tests/Feature/JobControllerTest.php
 │   ├── Enums/              # Enum (JlptLevel, MatchingStatus, dll.)
 │   ├── Http/
 │   │   ├── Controllers/    # Controller publik & student
-│   │   └── Middleware/      # Auth,EnsureStudentProfileComplete
+│   │   └── Middleware/      # Auth, EnsureStudentProfileComplete, Authenticate
 │   ├── Models/             # Eloquent models (User, Student, JobListing, dll.)
-│   ├── Notifications/      # NewApplicationReceived, ApplicationStatusChanged
+│   ├── Notifications/      # ApplicationStatusChanged, InterviewScheduleChanged, NewApplicationReceived
 │   └── Console/Commands/   # jobs:archive-expired
 ├── database/
 │   ├── factories/          # Model factories
@@ -163,6 +174,7 @@ php artisan test tests/Feature/JobControllerTest.php
 ├── docs/                   # Dokumentasi proyek
 ├── resources/
 │   └── views/
+│       ├── errors/         # Custom error pages (404, 403, 500)
 │       ├── layouts/        # Blade layouts
 │       ├── portal/         # Portal publik
 │       ├── student/        # Portal siswa
@@ -172,7 +184,10 @@ php artisan test tests/Feature/JobControllerTest.php
 ├── tests/                  # PHPUnit tests
 ├── app/Filament/
 │   ├── Admin/              # Panel admin (resources, pages, widgets)
+│   │   └── Resources/      # StudentResource, JobListingResource, ApplicationResource, UserResource, SswCategoryResource, LpkTskResource
 │   └── Recruiter/          # Panel recruiter (resources, pages, widgets)
+│       ├── Pages/          # Dashboard, Profile
+│       └── Resources/      # RecruiterJobListings, RecruiterApplications
 └── config/
 ```
 
@@ -184,19 +199,31 @@ php artisan test tests/Feature/JobControllerTest.php
 
 **Admin Panel (7 widgets):**
 - `StudentStatsOverview` — Statistik siswa (total, matched, proses matching, menunggu hasil, belum matching)
-- `ApplicationStatsOverview` — Statistik lamaran (total, menunggu, interview, diterima perusahaan)
+- `ApplicationStatsOverview` — Statistik lamaran (total, menunggu, interview, diterima perusahaan, ditarik)
 - `MatchingChart` — Doughnut chart status matching
 - `JlptChart` — Bar chart distribusi JLPT
 - `JobsBySswChart` — Bar chart lowongan per kategori SSW
 - `SswChart` — Bar chart siswa per kategori SSW
 - `PathwayChart` — Pie chart distribusi jalur (Mandiri/LPK)
 
+**Admin Resources:**
+- `StudentResource` — CRUD siswa dengan quick-action ubah status matching
+- `JobListingResource` — CRUD lowongan dengan tab lamaran
+- `ApplicationResource` — Manajemen lamaran dengan workflow
+- `SswCategoryResource` — CRUD 9 kategori SSW
+- `LpkTskResource` — CRUD LPK/TSK
+- `UserResource` — CRUD pengguna, reset password, ubah role
+
 **Recruiter Panel (5 widgets):**
-- `RecruiterStatsOverview` — 7 kartu statistik pribadi
+- `RecruiterStatsOverview` — 8 kartu statistik pribadi
 - `RecruiterApplicationsChart` — Doughnut chart status lamaran
 - `RecruiterApplicationsTrendChart` — Line chart tren lamaran (30 hari)
 - `RecruiterTopJobsWidget` — Tabel performa lowongan
 - `RecruiterUpcomingInterviewsWidget` — Tabel interview mendatang
+
+**Recruiter Pages:**
+- `Dashboard` — Statistik dan chart
+- `Profile` — Edit profil akun
 
 ### Scheduled Command
 

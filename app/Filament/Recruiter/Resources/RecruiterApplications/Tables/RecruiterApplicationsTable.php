@@ -105,6 +105,7 @@ class RecruiterApplicationsTable
                         'company_accepted' => 'Diterima Perusahaan',
                         'not_passed' => 'Tidak Lolos',
                         'rejected' => 'Ditolak',
+                        'withdrawn' => 'Ditarik',
                     ]),
             ])
             ->recordActions([

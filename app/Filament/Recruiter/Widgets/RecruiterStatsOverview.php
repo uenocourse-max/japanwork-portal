@@ -20,7 +20,7 @@ class RecruiterStatsOverview extends StatsOverviewWidget
             ->first();
 
         $applicationStats = JobApplication::whereHas('jobListing', fn ($q) => $q->where('posted_by', $userId))
-            ->selectRaw("COUNT(*) as total, COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending, COUNT(CASE WHEN status = 'accepted' THEN 1 END) as accepted, COUNT(CASE WHEN status = 'interview_scheduled' THEN 1 END) as interview_scheduled, COUNT(CASE WHEN status = 'company_accepted' THEN 1 END) as company_accepted")
+            ->selectRaw("COUNT(*) as total, COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending, COUNT(CASE WHEN status = 'accepted' THEN 1 END) as accepted, COUNT(CASE WHEN status = 'interview_scheduled' THEN 1 END) as interview_scheduled, COUNT(CASE WHEN status = 'company_accepted' THEN 1 END) as company_accepted, COUNT(CASE WHEN status = 'withdrawn' THEN 1 END) as withdrawn")
             ->first();
 
         return [
@@ -52,6 +52,10 @@ class RecruiterStatsOverview extends StatsOverviewWidget
                 ->description('Lolos seleksi perusahaan')
                 ->descriptionIcon('heroicon-m-trophy')
                 ->color('success'),
+            Stat::make('Ditarik', $applicationStats->withdrawn)
+                ->description('Lamaran yang ditarik')
+                ->descriptionIcon('heroicon-m-x-circle')
+                ->color('danger'),
         ];
     }
 }

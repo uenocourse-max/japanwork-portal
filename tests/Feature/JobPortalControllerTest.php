@@ -66,7 +66,7 @@ class JobPortalControllerTest extends TestCase
         $response = $this->get(route('portal.index', ['ssw_category_id' => $cat1->id]));
 
         $response->assertSee('Caregiver Job');
-        $response->assertDontSee('Construction Job');
+        $response->assertSee('1 lowongan ditemukan');
     }
 
     public function test_index_can_filter_by_job_type(): void
@@ -83,7 +83,7 @@ class JobPortalControllerTest extends TestCase
         $response = $this->get(route('portal.index', ['job_type' => 'magang']));
 
         $response->assertSee('Magang Job');
-        $response->assertDontSee('Engineer Job');
+        $response->assertSee('1 lowongan ditemukan');
     }
 
     public function test_index_can_filter_by_location(): void
@@ -100,7 +100,7 @@ class JobPortalControllerTest extends TestCase
         $response = $this->get(route('portal.index', ['location' => 'Tokyo']));
 
         $response->assertSee('Tokyo Job');
-        $response->assertDontSee('Osaka Job');
+        $response->assertSee('1 lowongan ditemukan');
     }
 
     public function test_index_search_by_title(): void
@@ -111,7 +111,7 @@ class JobPortalControllerTest extends TestCase
         $response = $this->get(route('portal.index', ['search' => 'Software']));
 
         $response->assertSee('Software Engineer');
-        $response->assertDontSee('Hotel Receptionist');
+        $response->assertSee('1 lowongan ditemukan');
     }
 
     public function test_show_displays_job(): void

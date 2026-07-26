@@ -19,11 +19,6 @@ Route::get('/', fn () => redirect()->route('portal.index'));
 Route::get('/jobs', [JobPortalController::class, 'index'])->name('portal.index');
 Route::get('/jobs/{job}', [JobPortalController::class, 'show'])->name('portal.show');
 
-// Auth apply (redirects to login if guest)
-Route::post('/jobs/{job}/apply', [JobController::class, 'apply'])
-    ->name('portal.apply')
-    ->middleware(['auth', EnsureStudentProfileComplete::class]);
-
 Route::middleware(['throttle:10,1'])->group(function () {
     Route::get('/register', [StudentRegisterController::class, 'showRegistrationForm'])->name('student.register');
     Route::post('/register', [StudentRegisterController::class, 'register'])->name('student.register.store');

@@ -30,7 +30,7 @@ class StudentProfileController extends Controller
         $student = $user->student;
         $sswCategories = SswCategory::all();
 
-        return view('student.profile.edit', compact('student', 'sswCategories'));
+        return view('student.profile.edit', compact('user', 'student', 'sswCategories'));
     }
 
     public function update(Request $request)
@@ -55,8 +55,6 @@ class StudentProfileController extends Controller
             'japanese_learning_months' => 'required|integer|min:0',
             'pathway' => 'required|in:mandiri,lpk',
             'lpk_name' => 'required_if:pathway,lpk|nullable|string|max:255',
-            'matching_status' => 'required|in:not_matched,process_matching,waiting_result,matched,cancelled',
-            'matched_company_name' => 'required_if:matching_status,matched|nullable|string|max:255',
             'photo_drive_url' => 'nullable|url',
             'cv_drive_url' => 'nullable|url',
             'ssw_categories' => 'required|array|min:1',
@@ -68,16 +66,11 @@ class StudentProfileController extends Controller
             'height_cm', 'weight_kg', 'blood_type', 'gender', 'marital_status',
             'phone_number', 'participant_status', 'jft_score', 'jlpt_level',
             'japanese_learning_months', 'pathway', 'lpk_name',
-            'matching_status', 'matched_company_name',
             'photo_drive_url', 'cv_drive_url',
         ]);
 
         if ($request->pathway === 'mandiri') {
             $studentData['lpk_name'] = null;
-        }
-
-        if ($request->matching_status !== 'matched') {
-            $studentData['matched_company_name'] = null;
         }
 
         $student = $user->student ?? new Student;

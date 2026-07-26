@@ -46,7 +46,14 @@ class JobPortalController extends Controller
 
         $totalJobs = $sswCategories->sum('job_listings_count');
 
-        return view('portal.index', compact('jobs', 'sswCategories', 'totalJobs', 'view'));
+        $popularJobs = JobListing::query()->available()
+            ->with('sswCategory')
+            ->withCount('applications')
+            ->orderByDesc('applications_count')
+            ->limit(5)
+            ->get();
+
+        return view('portal.index', compact('jobs', 'sswCategories', 'totalJobs', 'view', 'popularJobs'));
     }
 
     public function show(JobListing $job)

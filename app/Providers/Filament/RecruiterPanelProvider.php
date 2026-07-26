@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Recruiter\Pages\Dashboard;
+use App\Filament\Recruiter\Pages\Profile;
 use App\Filament\Recruiter\Widgets\RecruiterApplicationsChart;
 use App\Filament\Recruiter\Widgets\RecruiterApplicationsTrendChart;
 use App\Filament\Recruiter\Widgets\RecruiterStatsOverview;
@@ -37,6 +38,7 @@ class RecruiterPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Recruiter/Pages'), for: 'App\Filament\Recruiter\Pages')
             ->pages([
                 Dashboard::class,
+                Profile::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Recruiter/Widgets'), for: 'App\Filament\Recruiter\Widgets')
             ->widgets([

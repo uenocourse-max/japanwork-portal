@@ -37,6 +37,10 @@ class ApplicationStatsOverview extends StatsOverviewWidget
                 ->description('Lamaran lolos seleksi')
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success'),
+            Stat::make('Ditarik', $stats['withdrawn'] ?? 0)
+                ->description('Lamaran yang ditarik')
+                ->descriptionIcon('heroicon-m-x-circle')
+                ->color('danger'),
         ];
     }
 }

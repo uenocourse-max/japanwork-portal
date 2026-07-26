@@ -17,13 +17,15 @@ Tabel authentication untuk semua role (admin, student, recruiter).
 | name | VARCHAR(255) NOT NULL | |
 | email | VARCHAR(255) UNIQUE NOT NULL | |
 | password | VARCHAR(255) NOT NULL | |
-| role | VARCHAR(255) DEFAULT 'student' | 'admin', 'student', 'recruiter' |
+| role | VARCHAR(255) DEFAULT 'student' | 'admin', 'student', 'recruiter' (NOT mass-assignable) |
 | phone_number | VARCHAR(255) NULL | |
 | company_name | VARCHAR(255) NULL | Untuk recruiter |
 | location | VARCHAR(255) NULL | Untuk recruiter |
 | deleted_at | TIMESTAMP NULL | Soft deletes |
 | created_at | TIMESTAMP NULL | |
 | updated_at | TIMESTAMP NULL | |
+
+**Security Note:** `role` field is NOT in the Fillable array to prevent mass assignment attacks. Role can only be changed via admin panel.
 
 ### 2. students
 Profil lengkap siswa. Relasi 1:1 dengan users via `user_id`.

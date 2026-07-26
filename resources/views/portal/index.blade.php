@@ -285,9 +285,7 @@
                                             <h3 class="font-bold text-gray-900 group-hover:text-blue-600 transition text-base line-clamp-1">{{ $job->title }}</h3>
                                             <p class="text-sm text-gray-600 mt-0.5">{{ $job->company_name }}</p>
                                         </div>
-                                        @if ($job->deadline && $job->deadline->diffInDays(now()) <= 7)
-                                            <span class="flex-shrink-0 bg-red-50 text-red-600 border border-red-200 text-xs px-2.5 py-1 rounded-full font-medium">Closing</span>
-                                        @endif
+                                        <span class="flex-shrink-0 bg-green-50 text-green-700 border border-green-200 text-xs px-2.5 py-1 rounded-full font-medium">Masih Tersedia</span>
                                     </div>
                                     <div class="flex items-center gap-3 mt-2">
                                         <span class="inline-flex items-center gap-1 text-xs text-gray-400">
@@ -421,9 +419,6 @@
                                         @endif
                                     </div>
                                 @endif
-                                @if ($job->deadline && $job->deadline->diffInDays(now()) <= 7)
-                                    <span class="text-[10px] text-red-500 font-medium">Closing {{ $job->deadline->diffForHumans() }}</span>
-                                @endif
                             </div>
                             <svg class="w-4 h-4 text-gray-300 group-hover:text-blue-500 transition flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </a>
@@ -461,9 +456,7 @@
                                 @if ($job->jlpt_level_required)
                                     <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-50 text-purple-700 border border-purple-100">{{ $job->jlpt_level_required }}</span>
                                 @endif
-                                @if ($job->deadline && $job->deadline->diffInDays(now()) <= 7)
-                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-50 text-red-600 border border-red-200">Closing</span>
-                                @endif
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-50 text-green-700 border border-green-200">Masih Tersedia</span>
                             </div>
                             @if ($job->salary_min || $job->salary_max)
                                 <div class="mt-2.5 pt-2.5 border-t border-gray-100">
@@ -498,6 +491,27 @@
     </div>
 
     <aside class="lg:w-80 space-y-4">
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+            <h3 class="font-bold text-gray-900 mb-3">Lowongan Favorit</h3>
+            <div class="space-y-3">
+                @forelse ($popularJobs as $index => $job)
+                    <a href="{{ route('portal.show', $job) }}" class="flex items-start gap-3 group">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white text-xs font-bold flex items-center justify-center">{{ $index + 1 }}</span>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition line-clamp-1">{{ $job->title }}</h4>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <span class="text-xs text-gray-500">{{ $job->company_name }}</span>
+                                <span class="text-xs text-gray-300">&middot;</span>
+                                <span class="text-xs text-gray-400">{{ $job->applications_count }} pelamar</span>
+                            </div>
+                        </div>
+                    </a>
+                @empty
+                    <p class="text-sm text-gray-400">Belum ada data</p>
+                @endforelse
+            </div>
+        </div>
+
         <div class="bg-white rounded-xl border border-gray-200 p-5">
             <h3 class="font-bold text-gray-900 mb-3">Kategori SSW</h3>
             <div class="space-y-1.5">

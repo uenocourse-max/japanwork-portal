@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- PHP 8.3+
+- PHP 8.5+
 - Composer
 - Node.js & npm
 - PostgreSQL (atau SQLite untuk development)
@@ -181,6 +181,7 @@ Kaigo, Food Service, Agriculture, Construction, Manufacturing, Building Cleaning
 | Job Listing Detail | Lihat applicant per lowongan via ApplicationsRelationManager |
 | LPK/TSK | Kelola data LPK/TSK (otomatis buat akun recruiter) |
 | SSW Categories | Kelola kategori SSW |
+| Pengguna | CRUD user, reset password, ubah role |
 
 ### Recruiter (`/recruiter/login`)
 | Fitur | Deskripsi |
@@ -188,6 +189,7 @@ Kaigo, Food Service, Agriculture, Construction, Manufacturing, Building Cleaning
 | Dashboard | Welcome message, statistik lowongan & lamaran + jadwal interview, lamaran terbaru, lowongan saya |
 | Job Listings | Kelola lowongan yang diposting sendiri (scoped) + thumbnail + job type |
 | Applications | Lihat lamaran untuk lowongan sendiri — review → accept → jadwalkan interview → input hasil interview |
+| Profil Akun | Edit nama, email, password, info perusahaan |
 
 ### Siswa (`/student/*`)
 | Fitur | URL | Deskripsi |
@@ -197,7 +199,9 @@ Kaigo, Food Service, Agriculture, Construction, Manufacturing, Building Cleaning
 | Ganti Password | `/student/password` | Ubah password |
 | Lowongan Kerja | `/student/jobs` | Browse & filter lowongan (4 mode: detail/compact/list/grid) |
 | Detail Lowongan | `/student/jobs/{id}` | Lihat detail & melamar + thumbnail |
+| Bookmark | `/student/bookmarks` | Lihat lowongan favorit yang disimpan |
 | Lamaran Saya | `/student/applications` | Riwayat lamaran & status + detail interview jika sudah dijadwalkan |
+| Notifikasi | `/student/notifications` | Lihat notifikasi dan tanda sudah dibaca |
 
 ---
 
@@ -242,6 +246,7 @@ Login → Dashboard → Review Lamaran → Accept → Jadwalkan Interview → In
 - `interview_scheduled` menyimpan: interview_type (online/offline), interview_date, interview_location, interview_notes
 - `company_accepted` adalah final — otomatis update `matching_status = matched` + `matched_company_name`
 - `not_passed` adalah final — tidak ada update matching
+- Edit jadwal interview tersedia di admin & recruiter panels — siswa mendapat notifikasi perubahan
 - Semua perubahan status mengirim notifikasi ke student (database + email via queue)
 
 ### Lihat Profil (Recruiter)
@@ -272,10 +277,10 @@ Login → Dashboard → Review Lamaran → Accept → Jadwalkan Interview → In
 
 ```bash
 # Jalankan semua test
-php artisan test
+php artisan test --compact
 
 # Jalankan test tertentu
-php artisan test --filter=JobListingTest
+php artisan test --filter=JobControllerTest
 
 # Code style check
 vendor/bin/pint --test
@@ -283,6 +288,18 @@ vendor/bin/pint --test
 # Fix code style
 vendor/bin/pint
 ```
+
+### Test Coverage (70 tests, 140 assertions)
+- LoginTest (8 tests)
+- RegisterTest (8 tests)
+- JobControllerTest (9 tests)
+- JobPortalControllerTest (11 tests)
+- ApplicationControllerTest (8 tests)
+- SavedJobControllerTest (6 tests)
+- StudentProfileControllerTest (7 tests)
+- StudentDashboardControllerTest (3 tests)
+- EnsureStudentProfileCompleteTest (5 tests)
+- ArchiveExpiredJobsCommandTest (3 tests)
 
 ---
 

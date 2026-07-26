@@ -38,6 +38,7 @@
 │  ┌─────────────────────────────────────────────────┐        │
 │  │         Portal Publik (No Auth)                  │        │
 │  │  /jobs — browse, filter, 4 view modes            │        │
+│  │  Sidebar: Lowongan Favorit, Kategori SSW         │        │
 │  └─────────────────────┬───────────────────────────┘        │
 │                        │                                    │
 └────────────────────────┼────────────────────────────────────┘
@@ -59,6 +60,7 @@
 5. **Lamaran** → List semua lamaran, filter status, workflow
 6. **LPK/TSK** → Create otomatis buat user recruiter + LPK record
 7. **SSW Categories** → CRUD 9 kategori
+8. **Pengguna** → CRUD user, reset password, ubah role
 
 ### Workflow Lamaran (Admin & Recruiter)
 
@@ -89,7 +91,8 @@ pending ──► reviewed ──► accepted (preliminary)
 3. **Lowongan Saya** → CRUD (scoped ke recruiter login)
 4. **Lamaran Masuk** → List semua pelamar dari lowongan milik sendiri
 5. **Lihat Profil** → Modal full profile student + action inline
-6. Setiap perubahan status → **notifikasi** ke siswa (database + email via queue)
+6. **Profil Akun** → Edit nama, email, password, info perusahaan
+7. Setiap perubahan status → **notifikasi** ke siswa (database + email via queue)
 
 ---
 
@@ -164,6 +167,7 @@ Recruiter klik "Jadwalkan Interview" (status = accepted):
 |---------|------|----|---------|
 | Siswa apply | System | Recruiter | database + mail |
 | Status berubah | Recruiter | Student | database + mail |
+| Jadwal interview diubah | Recruiter | Student | database + mail |
 
 ---
 

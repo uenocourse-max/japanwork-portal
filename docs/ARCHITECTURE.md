@@ -68,21 +68,28 @@ Portal lowongan kerja Jepang (SSW/Tokutei Ginou, Magang, Engineer/Gijinkoku) den
 | POST | `/student/notifications/mark-all-read` | `ApplicationController@markAllNotificationsRead` | `student.notifications.markAllRead` |
 
 ### Admin (Filament, `/admin/*`)
-Resource list: `students`, `job-listings`, `applications`, `ssw-categories`, `lpk-tsks`
+Resource list: `students`, `job-listings`, `applications`, `ssw-categories`, `lpk-tsks`, `users`
 Widget: `StudentStatsOverview`, `ApplicationStatsOverview`, `MatchingChart`, `JlptChart`, `JobsBySswChart`, `SswChart`, `PathwayChart`
 
 ### Recruiter (Filament, `/recruiter/*`)
 Resource list: `recruiter-job-listings`, `recruiter-applications`
-Widget: `RecruiterStatsOverview`
+Pages: `Dashboard`, `Profile`
+Widget: `RecruiterStatsOverview`, `RecruiterApplicationsChart`, `RecruiterApplicationsTrendChart`, `RecruiterTopJobsWidget`, `RecruiterUpcomingInterviewsWidget`
+
+### Portal Publik (`/jobs`)
+Browse lowongan tanpa autentikasi. Sidebar menampilkan:
+- **Lowongan Favorit** — Top 5 lowongan berdasarkan jumlah pelamar (independent dari filter pencarian)
+- **Kategori SSW** — Daftar kategori dengan jumlah lowongan aktif
 
 ---
 
 ## Models
 
 ### User
-- **Fillable**: `name`, `email`, `password`, `role` (admin/student/recruiter), `phone_number`, `company_name`, `location`
+- **Fillable**: `name`, `email`, `password`, `phone_number`, `company_name`, `location`
 - **Relations**: `student()`, `lpkTsk()`, `postedJobs()`
 - **Methods**: `isAdmin()`, `isStudent()`, `isRecruiter()`, `canAccessPanel()`
+- **Security**: `role` NOT fillable via mass assignment — only changeable via admin panel
 
 ### Student
 - **Fillable**: `user_id`, `full_name`, `age`, `birth_place`, `birth_date`, `address`, `height_cm`, `weight_kg`, `blood_type`, `marital_status`, `phone_number`, `gender`, `participant_status`, `jft_score`, `jlpt_level`, `japanese_learning_months`, `pathway`, `lpk_name`, `photo_drive_url`, `cv_drive_url`, `matching_status`, `matched_company_name`
@@ -125,6 +132,9 @@ Widget: `RecruiterStatsOverview`
 | `view` | toggle | detail/compact/list/grid |
 | Sorting | — | `latest()` (created_at DESC) |
 
+**Sidebar widgets (independent dari filter):**
+- `popularJobs` — Top 5 lowongan berdasarkan `job_applications.count` (cache 5 menit)
+
 ---
 
 ## Notifications
@@ -139,6 +149,11 @@ Widget: `RecruiterStatsOverview`
 - **Data**: application_id, job_title, company_name, old_status, new_status, notes
 - **Dikirim**: Saat recruiter/admin ubah status lamaran (ke student)
 
+### InterviewScheduleChanged
+- **Channel**: database, mail
+- **Data**: application_id, job_title, company_name, old_schedule, new_schedule
+- **Dikirim**: Saat recruiter/admin edit jadwal interview (ke student)
+
 ---
 
 ## Console
@@ -152,12 +167,12 @@ Widget: `RecruiterStatsOverview`
 ## Testing
 
 - PHPUnit 12
-- 4 test files, 14 tests, 28 assertions
+- 10 test files, 70 tests, 140 assertions
 - Database: SQLite in-memory (`DB_CONNECTION=sqlite`, `DB_DATABASE=:memory:`)
 - RefreshDatabase trait used
 - `StudentFactory`: jlpt_level tanpa `JFT Basic A2` (kompatibel SQLite CHECK)
-- Coverage: JobController test (9), ArchiveExpiredJobsCommand test (3), Example tests (2)
-- Run: `php artisan test`
+- Coverage: LoginTest (8), RegisterTest (8), JobControllerTest (9), JobPortalControllerTest (11), ApplicationControllerTest (8), SavedJobControllerTest (6), StudentProfileControllerTest (7), StudentDashboardControllerTest (3), EnsureStudentProfileCompleteTest (5), ArchiveExpiredJobsCommandTest (3)
+- Run: `php artisan test --compact`
 
 ---
 
@@ -166,3 +181,10 @@ Widget: `RecruiterStatsOverview`
 - Laravel Cloud (https://cloud.laravel.com/) — fastest way to deploy
 - Pastikan queue runner aktif untuk notifikasi
 - Pastikan scheduler aktif untuk `jobs:archive-expired`
+
+## Error Pages
+
+Custom error pages tersedia di `resources/views/errors/`:
+- `404.blade.php` — Halaman tidak ditemukan
+- `403.blade.php` — Akses ditolak
+- `500.blade.php` — Kesalahan server

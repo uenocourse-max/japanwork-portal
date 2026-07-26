@@ -11,8 +11,14 @@
         <h3 class="text-lg font-semibold text-gray-700 mb-3 mt-6">Data Pribadi</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" value="{{ $user->email }}" readonly
+                    class="w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed">
+                <p class="text-xs text-gray-400 mt-1">Email tidak dapat diubah</p>
+            </div>
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
-                <input type="text" name="full_name" value="{{ old('full_name', $student->full_name ?? '') }}" required
+                <input type="text" name="full_name" value="{{ old('full_name', $student->full_name ?? $user->name ?? '') }}" required
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
                 @error('full_name') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
             </div>
@@ -155,25 +161,6 @@
         </div>
         @error('ssw_categories') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
 
-        <h3 class="text-lg font-semibold text-gray-700 mb-3 mt-6">Status Matching</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Status Matching</label>
-                <select name="matching_status" id="matching_status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
-                    @foreach(['not_matched' => 'Belum Matched', 'process_matching' => 'Proses Matching', 'waiting_result' => 'Menunggu Hasil', 'matched' => 'Matched', 'cancelled' => 'Dibatalkan'] as $value => $label)
-                        <option value="{{ $value }}" {{ old('matching_status', $student->matching_status ?? 'not_matched') === $value ? 'selected' : '' }}>{{ $label }}</option>
-                    @endforeach
-                </select>
-                @error('matching_status') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
-            </div>
-            <div id="company-field" style="{{ old('matching_status', $student->matching_status ?? '') !== 'matched' ? 'display:none' : '' }}">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Perusahaan</label>
-                <input type="text" name="matched_company_name" value="{{ old('matched_company_name', $student->matched_company_name ?? '') }}"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
-                @error('matched_company_name') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
-            </div>
-        </div>
-
         <h3 class="text-lg font-semibold text-gray-700 mb-3 mt-6">Dokumen</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -204,9 +191,6 @@
 <script>
 document.getElementById('pathway').addEventListener('change', function() {
     document.getElementById('lpk-field').style.display = this.value === 'lpk' ? 'block' : 'none';
-});
-document.getElementById('matching_status').addEventListener('change', function() {
-    document.getElementById('company-field').style.display = this.value === 'matched' ? 'block' : 'none';
 });
 </script>
 @endsection

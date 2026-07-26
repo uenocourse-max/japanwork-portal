@@ -50,6 +50,8 @@ Aplikasi **monolitik** untuk mengelola program penempatan siswa Indonesia ke Jep
 
 ### Portal Publik (No Auth)
 - Browse lowongan dengan search & filter, 4 view modes
+- Sidebar "Lowongan Favorit" (top 5 berdasarkan jumlah pelamar)
+- Sidebar Kategori SSW (daftar kategori dengan jumlah lowongan aktif)
 
 ## Database Tables (17)
 
