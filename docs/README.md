@@ -14,7 +14,7 @@ Aplikasi **monolitik** untuk mengelola program penempatan siswa Indonesia ke Jep
 - **Mail**: Log (development)
 - **Cache**: Database
 - **Testing**: PHPUnit 12
-- **Domain Enums**: `App\Enums` — single source of truth untuk status/tipe (lihat [ARCHITECTURE.md](ARCHITECTURE.md#enums-appenums))
+- **Domain Enums**: `App\Enums` — single source of truth untuk status/tipe, plus trait `HasBadgeClass` (`badgeClass()`, warna badge Tailwind) dan `HasHexColor` (`hexColor()`, warna chart) (lihat [ARCHITECTURE.md](ARCHITECTURE.md#enums-appenums))
 
 ## Role & Hak Akses
 
@@ -53,6 +53,10 @@ Aplikasi **monolitik** untuk mengelola program penempatan siswa Indonesia ke Jep
 - Browse lowongan dengan search & filter, 4 view modes
 - Sidebar "Lowongan Favorit" (top 5 berdasarkan jumlah pelamar)
 - Sidebar Kategori SSW (daftar kategori dengan jumlah lowongan aktif)
+
+### UI/UX
+- Badge status & warna chart konsisten (berasal dari enum)
+- Navigasi responsif + aksesibilitas (aria-label, role="alert", konfirmasi logout)
 
 ## Database Tables (17)
 

@@ -70,7 +70,14 @@ Semua status/tipe dikelola lewat enum `app/Enums/` sebagai single source of trut
 - `MatchingStatus` — status matching siswa
 - `JlptLevel` — level JLPT (N1–N5, JFT Basic A2)
 
-Setiap enum menyediakan `label()`, `color()`, dan `options()` untuk dipakai di Filament, Blade, controller, dan notification.
+Setiap enum menyediakan `label()`, `color()`, dan `options()` untuk dipakai di Filament, Blade, controller, dan notification. Dua trait pendukung di `app/Enums/Concerns/`:
+- `HasBadgeClass` — `badgeClass()` → kelas Tailwind untuk badge status (dipakai konsisten di semua halaman student)
+- `HasHexColor` — `hexColor()` → kode hex untuk chart Filament (dipakai `ApplicationStatus` & `MatchingStatus`)
+
+### UI/UX & Aksesibilitas
+- Badge status memakai warna konsisten dari enum (`badgeClass()`), tidak ada lagi peta warna manual per halaman
+- Navigasi responsif (hamburger menu di mobile) dengan `aria-label`, `role="alert"` pada flash message, dan konfirmasi logout
+- Warna chart (doughnut/bar) diambil dari `hexColor()` enum sehingga selaras dengan badge di tabel
 
 ## Tech Stack
 
@@ -153,7 +160,7 @@ Perintah ini menjalankan server, queue worker, dan Vite secara bersamaan.
 
 ## Testing
 
-Aplikasi menggunakan PHPUnit 12 dengan SQLite in-memory untuk pengujian (10 file, 74 test, 157 assertions).
+Aplikasi menggunakan PHPUnit 12 dengan SQLite in-memory untuk pengujian (17 file, 98 test, 237 assertions).
 
 ```bash
 # Jalankan semua test
@@ -170,7 +177,7 @@ php artisan test --compact tests/Feature/JobControllerTest.php
 
 ```
 ├── app/
-│   ├── Enums/              # Enum (JlptLevel, MatchingStatus, dll.)
+│   ├── Enums/              # Enum (JlptLevel, MatchingStatus, dll.) + Concerns (HasBadgeClass, HasHexColor)
 │   ├── Http/
 │   │   ├── Controllers/    # Controller publik & student
 │   │   └── Middleware/      # Auth, EnsureStudentProfileComplete, Authenticate

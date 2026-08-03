@@ -85,7 +85,13 @@ Browse lowongan tanpa autentikasi. Sidebar menampilkan:
 
 ## Enums (App\Enums)
 
-Enum PHP sebagai **single source of truth** untuk semua status/tipe yang sebelumnya berupa string mentah. Setiap enum memiliki `label()` (teks UI Bahasa Indonesia), `color()` (warna badge), dan `options()` (map value → label untuk form select/filter).
+Enum PHP sebagai **single source of truth** untuk semua status/tipe yang sebelumnya berupa string mentah. Setiap enum memiliki `label()` (teks UI Bahasa Indonesia), `color()` (warna badge Filament), dan `options()` (map value → label untuk form select/filter).
+
+Trait pendukung di `app/Enums/Concerns/`:
+- `HasBadgeClass` → `badgeClass()` — kelas Tailwind untuk badge (dipakai di view Blade student/portal)
+- `HasHexColor` → `hexColor()` — kode hex untuk chart (dipakai `ApplicationStatus` & `MatchingStatus` di widget Filament)
+
+Dengan `badgeClass()`, warna badge status konsisten di semua halaman student (dashboard, aplikasi, profil) tanpa peta warna duplikat.
 
 | Enum | Values | Konteks |
 |---|---|---|
@@ -182,14 +188,35 @@ Enum PHP sebagai **single source of truth** untuk semua status/tipe yang sebelum
 
 ---
 
+## UI/UX & Aksesibilitas
+
+Perbaikan berbasis audit:
+
+- **Warna badge konsisten** — semua halaman student memakai `badgeClass()` dari enum (tidak ada map warna manual per view)
+- **Warna chart selaras** — `MatchingChart` & `RecruiterApplicationsChart` memakai `hexColor()` enum, tidak ada palet hardcode yang kontradiktif dengan badge tabel
+- **Navigasi responsif** — layout student (`layouts/app.blade.php`) punya hamburger menu di mobile; link desktop di baris terpisah agar tidak overflow
+- **Aksesibilitas** — `lang="id"` di layout student/guest/portal, `aria-label` pada tombol notifikasi, `role="alert"` pada flash message, `aria-hidden` pada badge unread
+- **Konfirmasi logout** — form logout memakai `onsubmit="return confirm(...)"`
+- **Profil recruiter** — halaman `Profile.php` di-refactor ke pola Filament v5 (`form(Schema $schema)` + `fillForm()`) sehingga form tidak lagi kosong
+- **Grid dashboard recruiter** — `RecruiterUpcomingInterviewsWidget` & `RecruiterTopJobsWidget` memakai `$columnSpan = 1` agar grid `lg:grid-cols-2` berfungsi
+- **Badge JLPT** — warna dari `JlptLevel::color()` (bukan hardcode), inisial avatar pakai `mb_substr(..., 0, 1)` dengan fallback
+- **Tampilan null-safe** — kolom gender/pathway/participant_status menampilkan `-` saat null (bukan "Perempuan"/"LPK" palsu)
+- **Aksi "Tolak" berwarna danger** di panel recruiter (selaras dengan panel admin)
+
+---
+
 ## Testing
 
 - PHPUnit 12
-- 10 test files, 74 tests, 157 assertions
+- 17 test files, 98 tests, 237 assertions
 - Database: SQLite in-memory (`DB_CONNECTION=sqlite`, `DB_DATABASE=:memory:`)
 - RefreshDatabase trait used
 - `StudentFactory`: jlpt_level hanya N1–N5 (tanpa `JFT Basic A2`, kompatibel SQLite CHECK)
-- Coverage: LoginTest, RegisterTest, JobControllerTest, JobPortalControllerTest, ApplicationControllerTest, SavedJobControllerTest, StudentProfileControllerTest, StudentDashboardControllerTest, EnsureStudentProfileCompleteTest, ArchiveExpiredJobsCommandTest, LpkTskResourceTest
+- Coverage: LoginTest, RegisterTest, JobControllerTest, JobPortalControllerTest, PortalPublicTest, ApplicationControllerTest, ApplicationWithdrawTest, MatchingWorkflowTest, ApplicationStatusChangedNotificationTest, SavedJobControllerTest, StudentProfileControllerTest, StudentDashboardControllerTest, EnsureStudentProfileCompleteTest, ArchiveExpiredJobsCommandTest, LpkTskResourceTest
+- **MatchingWorkflowTest** — aksi recruiter `input_result` (company_accepted → `matching_status=matched` + notifikasi; not_passed tidak mengubah matching)
+- **ApplicationWithdrawTest** — edge case withdraw (sudah withdrawn, rejected, not_passed, interview_scheduled, company_accepted, guest, GET → 405)
+- **ApplicationStatusChangedNotificationTest** — payload & email notifikasi
+- **PortalPublicTest** — filter JLPT, empty state, CTA guest vs recruiter, bookmark dari portal
 - Run: `php artisan test --compact`
 
 ---
