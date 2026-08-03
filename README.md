@@ -62,6 +62,16 @@ pending → reviewed → accepted → interview_scheduled → company_accepted (
 - Rate limiting pada login dan registrasi
 - Custom error pages (404, 403, 500)
 
+### Domain Enums
+Semua status/tipe dikelola lewat enum `app/Enums/` sebagai single source of truth:
+- `ApplicationStatus` — status lamaran (pending, reviewed, accepted, interview_scheduled, company_accepted, not_passed, rejected, withdrawn)
+- `JobStatus` — status lowongan (draft, open, closed, filled)
+- `JobType` — jenis lowongan (magang, tg, engineer)
+- `MatchingStatus` — status matching siswa
+- `JlptLevel` — level JLPT (N1–N5, JFT Basic A2)
+
+Setiap enum menyediakan `label()`, `color()`, dan `options()` untuk dipakai di Filament, Blade, controller, dan notification.
+
 ## Tech Stack
 
 | Komponen | Teknologi |
@@ -143,7 +153,7 @@ Perintah ini menjalankan server, queue worker, dan Vite secara bersamaan.
 
 ## Testing
 
-Aplikasi menggunakan PHPUnit 12 dengan SQLite in-memory untuk pengujian.
+Aplikasi menggunakan PHPUnit 12 dengan SQLite in-memory untuk pengujian (10 file, 74 test, 157 assertions).
 
 ```bash
 # Jalankan semua test

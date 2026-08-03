@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Enums\ApplicationStatus;
 use App\Models\JobApplication;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -24,16 +25,8 @@ class ApplicationStatusChanged extends Notification implements ShouldQueue
 
     public function toArray(object $notifiable): array
     {
-        $statusLabel = match ($this->application->status) {
-            'pending' => 'Menunggu',
-            'reviewed' => 'Sudah Direview',
-            'accepted' => 'Diterima',
-            'interview_scheduled' => 'Jadwal Interview Ditentukan',
-            'company_accepted' => 'Diterima Perusahaan',
-            'not_passed' => 'Tidak Lolos',
-            'rejected' => 'Ditolak',
-            default => ucfirst($this->application->status),
-        };
+        $statusLabel = ApplicationStatus::tryFrom($this->application->status)?->label()
+            ?? ucfirst($this->application->status);
 
         return [
             'type' => 'application_status_changed',
@@ -49,22 +42,14 @@ class ApplicationStatusChanged extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $statusLabel = match ($this->application->status) {
-            'pending' => 'Menunggu',
-            'reviewed' => 'Sudah Direview',
-            'accepted' => 'Diterima',
-            'interview_scheduled' => 'Jadwal Interview Ditentukan',
-            'company_accepted' => 'Diterima Perusahaan',
-            'not_passed' => 'Tidak Lolos',
-            'rejected' => 'Ditolak',
-            default => ucfirst($this->application->status),
-        };
+        $statusLabel = ApplicationStatus::tryFrom($this->application->status)?->label()
+            ?? ucfirst($this->application->status);
 
         return (new MailMessage)
             ->subject('Status Lamaran Diperbarui')
             ->line("Lamaran Anda untuk **{$this->application->jobListing->title}** di **{$this->application->jobListing->company_name}** telah diperbarui.")
             ->line("Status terbaru: **{$statusLabel}**")
-            ->when($this->application->status === 'interview_scheduled', function ($m) {
+            ->when($this->application->status === ApplicationStatus::InterviewScheduled->value, function ($m) {
                 $app = $this->application;
                 $type = $app->interview_type === 'online' ? 'Online (Meeting)' : 'Langsung';
                 $m->line("Jenis Interview: {$type}");
@@ -78,7 +63,7 @@ class ApplicationStatusChanged extends Notification implements ShouldQueue
                     $m->line("Catatan: {$app->interview_notes}");
                 }
             })
-            ->when($this->application->notes && $this->application->status !== 'interview_scheduled', fn ($m) => $m->line("Catatan: {$this->application->notes}"))
+            ->when($this->application->notes && $this->application->status !== ApplicationStatus::InterviewScheduled->value, fn ($m) => $m->line("Catatan: {$this->application->notes}"))
             ->action('Lihat Lamaran', url('/student/applications'))
             ->line('Terima kasih telah menggunakan Japan Work Program.');
     }

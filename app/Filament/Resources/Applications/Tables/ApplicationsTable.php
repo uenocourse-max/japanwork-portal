@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\Applications\Tables;
 
+use App\Enums\ApplicationStatus;
+use App\Enums\JlptLevel;
+use App\Enums\MatchingStatus;
 use App\Models\JobApplication;
 use App\Notifications\ApplicationStatusChanged;
 use App\Notifications\InterviewScheduleChanged;
@@ -18,34 +21,6 @@ use Filament\Tables\Table;
 
 class ApplicationsTable
 {
-    public static function getStatusColor(string $state): string
-    {
-        return match ($state) {
-            'pending' => 'gray',
-            'reviewed' => 'info',
-            'accepted' => 'success',
-            'interview_scheduled' => 'warning',
-            'company_accepted' => 'success',
-            'not_passed' => 'danger',
-            'rejected' => 'danger',
-            default => 'gray',
-        };
-    }
-
-    public static function getStatusLabel(string $state): string
-    {
-        return match ($state) {
-            'pending' => 'Menunggu',
-            'reviewed' => 'Sudah Direview',
-            'accepted' => 'Diterima',
-            'interview_scheduled' => 'Jadwal Interview',
-            'company_accepted' => 'Diterima Perusahaan',
-            'not_passed' => 'Tidak Lolos',
-            'rejected' => 'Ditolak',
-            default => ucfirst($state),
-        };
-    }
-
     public static function configure(Table $table): Table
     {
         return $table
@@ -64,15 +39,9 @@ class ApplicationsTable
                 Tables\Columns\TextColumn::make('student.jlpt_level')
                     ->label('JLPT')
                     ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'N1' => 'danger',
-                        'N2' => 'warning',
-                        'N3' => 'info',
-                        'N4' => 'success',
-                        'N5' => 'gray',
-                        'JFT Basic A2' => 'info',
-                        default => 'gray',
-                    })
+                    ->color(fn (?string $state): string => $state
+                        ? (JlptLevel::tryFrom($state)?->color() ?? 'gray')
+                        : 'gray')
                     ->placeholder('-'),
                 Tables\Columns\TextColumn::make('student.phone_number')
                     ->label('Telepon')
@@ -80,8 +49,8 @@ class ApplicationsTable
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => self::getStatusLabel($state))
-                    ->color(fn (string $state): string => self::getStatusColor($state)),
+                    ->formatStateUsing(fn (string $state): string => ApplicationStatus::tryFrom($state)?->label() ?? ucfirst($state))
+                    ->color(fn (string $state): string => ApplicationStatus::tryFrom($state)?->color() ?? 'gray'),
                 Tables\Columns\TextColumn::make('applied_at')
                     ->label('Tanggal Lamar')
                     ->dateTime('d M Y H:i')
@@ -96,16 +65,7 @@ class ApplicationsTable
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Status')
-                    ->options([
-                        'pending' => 'Menunggu',
-                        'reviewed' => 'Sudah Direview',
-                        'accepted' => 'Diterima',
-                        'interview_scheduled' => 'Jadwal Interview',
-                        'company_accepted' => 'Diterima Perusahaan',
-                        'not_passed' => 'Tidak Lolos',
-                        'rejected' => 'Ditolak',
-                        'withdrawn' => 'Ditarik',
-                    ]),
+                    ->options(ApplicationStatus::options()),
             ])
             ->recordActions([
                 Action::make('review')
@@ -115,7 +75,7 @@ class ApplicationsTable
                     ->requiresConfirmation()
                     ->modalHeading('Review Lamaran')
                     ->modalDescription('Tandai lamaran ini sudah direview.')
-                    ->visible(fn ($record): bool => $record->status === 'pending')
+                    ->visible(fn ($record): bool => $record->status === ApplicationStatus::Pending->value)
                     ->schema([
                         Textarea::make('notes')
                             ->label('Catatan')
@@ -125,7 +85,7 @@ class ApplicationsTable
                     ->action(function ($record, array $data): void {
                         $oldStatus = $record->status;
                         $record->update([
-                            'status' => 'reviewed',
+                            'status' => ApplicationStatus::Reviewed->value,
                             'notes' => $data['notes'] ?: $record->notes,
                             'reviewed_at' => now(),
                         ]);
@@ -139,7 +99,7 @@ class ApplicationsTable
                     ->requiresConfirmation()
                     ->modalHeading('Terima Lamaran')
                     ->modalDescription('Lamaran ini akan diproses ke tahap interview.')
-                    ->visible(fn ($record): bool => $record->status === 'reviewed')
+                    ->visible(fn ($record): bool => $record->status === ApplicationStatus::Reviewed->value)
                     ->schema([
                         Textarea::make('notes')
                             ->label('Catatan')
@@ -149,7 +109,7 @@ class ApplicationsTable
                     ->action(function ($record, array $data): void {
                         $oldStatus = $record->status;
                         $record->update([
-                            'status' => 'accepted',
+                            'status' => ApplicationStatus::Accepted->value,
                             'notes' => $data['notes'] ?: $record->notes,
                             'reviewed_at' => $record->reviewed_at ?? now(),
                         ]);
@@ -162,7 +122,7 @@ class ApplicationsTable
                     ->color('warning')
                     ->modalHeading('Jadwalkan Interview')
                     ->modalDescription('Isi detail jadwal interview.')
-                    ->visible(fn ($record): bool => $record->status === 'accepted')
+                    ->visible(fn ($record): bool => $record->status === ApplicationStatus::Accepted->value)
                     ->form([
                         Select::make('interview_type')
                             ->label('Jenis Interview')
@@ -184,7 +144,7 @@ class ApplicationsTable
                     ->action(function ($record, array $data): void {
                         $oldStatus = $record->status;
                         $record->update([
-                            'status' => 'interview_scheduled',
+                            'status' => ApplicationStatus::InterviewScheduled->value,
                             'interview_type' => $data['interview_type'],
                             'interview_date' => $data['interview_date'],
                             'interview_location' => $data['interview_location'],
@@ -199,7 +159,7 @@ class ApplicationsTable
                     ->color('primary')
                     ->modalHeading('Edit Jadwal Interview')
                     ->modalDescription('Ubah detail jadwal interview yang sudah dijadwalkan.')
-                    ->visible(fn ($record): bool => $record->status === 'interview_scheduled')
+                    ->visible(fn ($record): bool => $record->status === ApplicationStatus::InterviewScheduled->value)
                     ->form(fn (JobApplication $record): array => [
                         Select::make('interview_type')
                             ->label('Jenis Interview')
@@ -256,13 +216,13 @@ class ApplicationsTable
                     ->color('info')
                     ->modalHeading('Input Hasil Interview')
                     ->modalDescription('Pilih hasil akhir interview.')
-                    ->visible(fn ($record): bool => $record->status === 'interview_scheduled')
+                    ->visible(fn ($record): bool => $record->status === ApplicationStatus::InterviewScheduled->value)
                     ->form([
                         Select::make('result')
                             ->label('Hasil')
                             ->options([
-                                'company_accepted' => 'Diterima Perusahaan',
-                                'not_passed' => 'Tidak Lolos',
+                                ApplicationStatus::CompanyAccepted->value => 'Diterima Perusahaan',
+                                ApplicationStatus::NotPassed->value => 'Tidak Lolos',
                             ])
                             ->required(),
                         Textarea::make('notes')
@@ -277,11 +237,11 @@ class ApplicationsTable
                             'notes' => $data['notes'] ?: $record->notes,
                         ]);
 
-                        if ($newStatus === 'company_accepted') {
+                        if ($newStatus === ApplicationStatus::CompanyAccepted->value) {
                             $student = $record->student;
                             if ($student) {
                                 $student->update([
-                                    'matching_status' => 'matched',
+                                    'matching_status' => MatchingStatus::Matched->value,
                                     'matched_company_name' => $record->jobListing->company_name,
                                 ]);
                             }
@@ -297,7 +257,11 @@ class ApplicationsTable
                     ->requiresConfirmation()
                     ->modalHeading('Tolak Lamaran')
                     ->modalDescription('Lamaran siswa ini akan ditolak.')
-                    ->visible(fn ($record): bool => ! in_array($record->status, ['company_accepted', 'not_passed', 'rejected']))
+                    ->visible(fn ($record): bool => ! in_array($record->status, [
+                        ApplicationStatus::CompanyAccepted->value,
+                        ApplicationStatus::NotPassed->value,
+                        ApplicationStatus::Rejected->value,
+                    ]))
                     ->schema([
                         Textarea::make('notes')
                             ->label('Catatan')
@@ -307,7 +271,7 @@ class ApplicationsTable
                     ->action(function ($record, array $data): void {
                         $oldStatus = $record->status;
                         $record->update([
-                            'status' => 'rejected',
+                            'status' => ApplicationStatus::Rejected->value,
                             'notes' => $data['notes'] ?: $record->notes,
                             'reviewed_at' => $record->reviewed_at ?? now(),
                         ]);

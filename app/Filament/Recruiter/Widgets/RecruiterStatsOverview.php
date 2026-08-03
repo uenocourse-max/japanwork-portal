@@ -2,6 +2,8 @@
 
 namespace App\Filament\Recruiter\Widgets;
 
+use App\Enums\ApplicationStatus;
+use App\Enums\JobStatus;
 use App\Models\JobApplication;
 use App\Models\JobListing;
 use Filament\Widgets\StatsOverviewWidget;
@@ -16,11 +18,11 @@ class RecruiterStatsOverview extends StatsOverviewWidget
         $userId = (int) auth()->id();
 
         $stats = JobListing::where('posted_by', $userId)
-            ->selectRaw("COUNT(*) as total, COUNT(CASE WHEN status = 'open' THEN 1 END) as open_jobs")
+            ->selectRaw("COUNT(*) as total, COUNT(CASE WHEN status = '".JobStatus::Open->value."' THEN 1 END) as open_jobs")
             ->first();
 
         $applicationStats = JobApplication::whereHas('jobListing', fn ($q) => $q->where('posted_by', $userId))
-            ->selectRaw("COUNT(*) as total, COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending, COUNT(CASE WHEN status = 'accepted' THEN 1 END) as accepted, COUNT(CASE WHEN status = 'interview_scheduled' THEN 1 END) as interview_scheduled, COUNT(CASE WHEN status = 'company_accepted' THEN 1 END) as company_accepted, COUNT(CASE WHEN status = 'withdrawn' THEN 1 END) as withdrawn")
+            ->selectRaw("COUNT(*) as total, COUNT(CASE WHEN status = '".ApplicationStatus::Pending->value."' THEN 1 END) as pending, COUNT(CASE WHEN status = '".ApplicationStatus::Accepted->value."' THEN 1 END) as accepted, COUNT(CASE WHEN status = '".ApplicationStatus::InterviewScheduled->value."' THEN 1 END) as interview_scheduled, COUNT(CASE WHEN status = '".ApplicationStatus::CompanyAccepted->value."' THEN 1 END) as company_accepted, COUNT(CASE WHEN status = '".ApplicationStatus::Withdrawn->value."' THEN 1 END) as withdrawn")
             ->first();
 
         return [

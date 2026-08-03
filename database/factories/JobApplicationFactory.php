@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ApplicationStatus;
 use App\Models\JobApplication;
 use App\Models\JobListing;
 use App\Models\Student;
@@ -19,20 +20,20 @@ class JobApplicationFactory extends Factory
         return [
             'job_listing_id' => JobListing::factory(),
             'student_id' => Student::factory(),
-            'status' => 'pending',
+            'status' => ApplicationStatus::Pending->value,
             'applied_at' => fake()->dateTimeBetween('-1 month', 'now'),
         ];
     }
 
     public function pending(): static
     {
-        return $this->state(fn () => ['status' => 'pending']);
+        return $this->state(fn () => ['status' => ApplicationStatus::Pending->value]);
     }
 
     public function reviewed(): static
     {
         return $this->state(fn () => [
-            'status' => 'reviewed',
+            'status' => ApplicationStatus::Reviewed->value,
             'reviewed_at' => fake()->dateTimeBetween('-1 week', 'now'),
         ]);
     }
@@ -40,7 +41,7 @@ class JobApplicationFactory extends Factory
     public function accepted(): static
     {
         return $this->state(fn () => [
-            'status' => 'accepted',
+            'status' => ApplicationStatus::Accepted->value,
             'reviewed_at' => fake()->dateTimeBetween('-1 week', 'now'),
         ]);
     }
@@ -48,7 +49,7 @@ class JobApplicationFactory extends Factory
     public function rejected(): static
     {
         return $this->state(fn () => [
-            'status' => 'rejected',
+            'status' => ApplicationStatus::Rejected->value,
             'reviewed_at' => fake()->dateTimeBetween('-1 week', 'now'),
         ]);
     }
@@ -56,7 +57,7 @@ class JobApplicationFactory extends Factory
     public function interviewScheduled(): static
     {
         return $this->state(fn () => [
-            'status' => 'interview_scheduled',
+            'status' => ApplicationStatus::InterviewScheduled->value,
             'reviewed_at' => fake()->dateTimeBetween('-1 week', 'now'),
             'interview_type' => fake()->randomElement(['online', 'offline']),
             'interview_date' => fake()->dateTimeBetween('now', '+2 weeks'),
@@ -68,7 +69,7 @@ class JobApplicationFactory extends Factory
     public function companyAccepted(): static
     {
         return $this->state(fn () => [
-            'status' => 'company_accepted',
+            'status' => ApplicationStatus::CompanyAccepted->value,
             'reviewed_at' => fake()->dateTimeBetween('-2 weeks', '-1 week'),
             'interview_type' => fake()->randomElement(['online', 'offline']),
             'interview_date' => fake()->dateTimeBetween('-1 week', 'now'),
@@ -80,7 +81,7 @@ class JobApplicationFactory extends Factory
     public function notPassed(): static
     {
         return $this->state(fn () => [
-            'status' => 'not_passed',
+            'status' => ApplicationStatus::NotPassed->value,
             'reviewed_at' => fake()->dateTimeBetween('-2 weeks', '-1 week'),
             'interview_type' => fake()->randomElement(['online', 'offline']),
             'interview_date' => fake()->dateTimeBetween('-1 week', 'now'),

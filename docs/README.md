@@ -14,6 +14,7 @@ Aplikasi **monolitik** untuk mengelola program penempatan siswa Indonesia ke Jep
 - **Mail**: Log (development)
 - **Cache**: Database
 - **Testing**: PHPUnit 12
+- **Domain Enums**: `App\Enums` — single source of truth untuk status/tipe (lihat [ARCHITECTURE.md](ARCHITECTURE.md#enums-appenums))
 
 ## Role & Hak Akses
 

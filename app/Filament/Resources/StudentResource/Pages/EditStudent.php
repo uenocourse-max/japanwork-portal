@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\StudentResource\Pages;
 
+use App\Enums\MatchingStatus;
 use App\Filament\Resources\StudentResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
@@ -59,7 +60,7 @@ class EditStudent extends EditRecord
         $sswCategories = $data['ssw_categories'] ?? [];
         unset($data['ssw_categories']);
 
-        if (($data['matching_status'] ?? '') !== 'matched' || empty($data['matched_company_name'])) {
+        if (($data['matching_status'] ?? '') !== MatchingStatus::Matched->value || empty($data['matched_company_name'])) {
             $data['matched_company_name'] = null;
         }
 

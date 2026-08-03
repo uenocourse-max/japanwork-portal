@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\JobStatus;
 use App\Models\JobListing;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\Cache;
@@ -23,7 +24,7 @@ class JobsBySswChart extends ChartWidget
     protected function getData(): array
     {
         $data = Cache::remember('widget_jobs_by_ssw', 300, function () {
-            return JobListing::where('status', 'open')
+            return JobListing::where('status', JobStatus::Open->value)
                 ->whereNotNull('ssw_category_id')
                 ->join('ssw_categories', 'job_listings.ssw_category_id', '=', 'ssw_categories.id')
                 ->selectRaw('ssw_categories.name as category, COUNT(*) as total')

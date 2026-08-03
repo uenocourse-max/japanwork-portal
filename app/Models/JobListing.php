@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\JobStatus;
 use Database\Factories\JobListingFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -66,7 +67,7 @@ class JobListing extends Model
 
     public function scopeAvailable(Builder $query): Builder
     {
-        return $query->where('status', 'open')
+        return $query->where('status', JobStatus::Open->value)
             ->where(fn ($q) => $q->whereNull('deadline')->orWhere('deadline', '>=', now()));
     }
 

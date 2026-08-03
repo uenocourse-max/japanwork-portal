@@ -28,12 +28,13 @@ class StudentRegisterController extends Controller
             'password' => ['required', 'confirmed', Password::min(8)],
         ]);
 
-        $user = User::create([
+        $user = User::make([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'student',
         ]);
+        $user->forceFill(['role' => 'student']);
+        $user->save();
 
         Auth::login($user);
 

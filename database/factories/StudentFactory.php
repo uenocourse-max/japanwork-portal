@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\JlptLevel;
+use App\Enums\MatchingStatus;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -30,13 +32,19 @@ class StudentFactory extends Factory
             'gender' => fake()->randomElement(['male', 'female']),
             'participant_status' => fake()->randomElement(['ex', 'new_comer']),
             'jft_score' => fake()->optional()->numberBetween(0, 480),
-            'jlpt_level' => fake()->randomElement(['N5', 'N4', 'N3', 'N2', 'N1']),
+            'jlpt_level' => fake()->randomElement([
+                JlptLevel::N5->value,
+                JlptLevel::N4->value,
+                JlptLevel::N3->value,
+                JlptLevel::N2->value,
+                JlptLevel::N1->value,
+            ]),
             'japanese_learning_months' => fake()->numberBetween(0, 36),
             'pathway' => fake()->randomElement(['mandiri', 'lpk']),
             'lpk_name' => null,
             'photo_drive_url' => null,
             'cv_drive_url' => null,
-            'matching_status' => 'not_matched',
+            'matching_status' => MatchingStatus::NotMatched->value,
             'matched_company_name' => null,
         ];
     }

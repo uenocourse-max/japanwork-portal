@@ -171,7 +171,7 @@ Recruiter klik "Jadwalkan Interview" (status = accepted):
 
 ---
 
-## Job Type System
+## Job Type System (`JobType` enum)
 
 | `job_type` | Label di UI | Syarat Apply |
 |------------|-------------|--------------|

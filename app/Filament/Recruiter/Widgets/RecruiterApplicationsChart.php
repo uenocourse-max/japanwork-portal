@@ -2,6 +2,7 @@
 
 namespace App\Filament\Recruiter\Widgets;
 
+use App\Enums\ApplicationStatus;
 use App\Models\JobApplication;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\Cache;
@@ -33,16 +34,7 @@ class RecruiterApplicationsChart extends ChartWidget
                 ->toArray();
         });
 
-        $labels = [
-            'pending' => 'Menunggu',
-            'reviewed' => 'Direview',
-            'accepted' => 'Diterima',
-            'interview_scheduled' => 'Jadwal Interview',
-            'company_accepted' => 'Diterima Perusahaan',
-            'not_passed' => 'Tidak Lolos',
-            'rejected' => 'Ditolak',
-            'withdrawn' => 'Ditarik',
-        ];
+        $labels = ApplicationStatus::options();
 
         $colors = [
             '#f59e0b', // pending - warning

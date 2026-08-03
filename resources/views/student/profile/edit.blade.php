@@ -106,8 +106,8 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Level JLPT</label>
                 <select name="jlpt_level" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
                     <option value="">Tidak Ada</option>
-                    @foreach(['N5', 'N4', 'N3', 'N2', 'N1', 'JFT Basic A2'] as $level)
-                        <option value="{{ $level }}" {{ old('jlpt_level', $student->jlpt_level ?? '') === $level ? 'selected' : '' }}>{{ $level }}</option>
+                    @foreach(\App\Enums\JlptLevel::options() as $value => $label)
+                        <option value="{{ $value }}" {{ old('jlpt_level', $student->jlpt_level ?? '') === $value ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
                 </select>
                 @error('jlpt_level') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror

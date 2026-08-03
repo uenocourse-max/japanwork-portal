@@ -12,14 +12,14 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        User::firstOrCreate(
+        $admin = User::firstOrCreate(
             ['email' => 'admin@example.com'],
             [
                 'name' => 'Admin',
                 'password' => Hash::make('password'),
-                'role' => 'admin',
             ]
         );
+        $admin->forceFill(['role' => 'admin'])->save();
 
         $sswCategories = [
             'Kaigo',
@@ -49,11 +49,11 @@ class AdminSeeder extends Seeder
                 [
                     'name' => $lpk['name'],
                     'password' => Hash::make('password'),
-                    'role' => 'recruiter',
                     'company_name' => $lpk['name'],
                     'location' => $lpk['location'],
                 ]
             );
+            $user->forceFill(['role' => 'recruiter'])->save();
 
             LpkTsk::firstOrCreate(
                 ['email' => $lpk['email']],

@@ -47,11 +47,11 @@ Profil lengkap siswa. Relasi 1:1 dengan users via `user_id`.
 | phone_number | VARCHAR(255) UNIQUE NOT NULL | |
 | participant_status | VARCHAR(255) NOT NULL | 'ex', 'new_comer' |
 | jft_score | INTEGER NULL | |
-| jlpt_level | VARCHAR(255) NULL | 'N5','N4','N3','N2','N1','JFT Basic A2' |
+| jlpt_level | VARCHAR(255) NULL | `JlptLevel` enum: 'N5','N4','N3','N2','N1','JFT Basic A2' |
 | japanese_learning_months | INTEGER NOT NULL | |
 | pathway | VARCHAR(255) NOT NULL | 'mandiri', 'lpk' |
 | lpk_name | VARCHAR(255) NULL | |
-| matching_status | VARCHAR(255) DEFAULT 'not_matched' | 'not_matched','process_matching','waiting_result','matched','cancelled' |
+| matching_status | VARCHAR(255) DEFAULT 'not_matched' | `MatchingStatus` enum: 'not_matched','process_matching','waiting_result','matched','cancelled' |
 | matched_company_name | VARCHAR(255) NULL | |
 | photo_drive_url | VARCHAR(255) NULL | Google Drive link |
 | cv_drive_url | VARCHAR(255) NULL | Google Drive link |
@@ -86,10 +86,10 @@ Lowongan kerja yang diposting oleh recruiter.
 | company_description | TEXT NULL | |
 | thumbnail_url | VARCHAR(255) NULL | Google Drive / URL |
 | ssw_category_id | BIGINT FK → ssw_categories(id) | Required untuk job_type = 'tg' |
-| jlpt_level_required | VARCHAR(255) NULL | |
+| jlpt_level_required | VARCHAR(255) NULL | `JlptLevel` enum |
 | participant_status_required | VARCHAR(255) NULL | 'ex', 'new_comer', 'any' |
-| status | VARCHAR(255) DEFAULT 'draft' | 'draft', 'open', 'closed', 'filled' |
-| job_type | VARCHAR(255) DEFAULT 'tg' | 'magang', 'tg', 'engineer' |
+| status | VARCHAR(255) DEFAULT 'draft' | `JobStatus` enum: 'draft', 'open', 'closed', 'filled' |
+| job_type | VARCHAR(255) DEFAULT 'tg' | `JobType` enum: 'magang', 'tg', 'engineer' |
 | posted_by | BIGINT FK → users(id) | |
 | deadline | DATE NULL | |
 | deleted_at | TIMESTAMP NULL | Soft deletes |
@@ -104,7 +104,7 @@ Aplikasi/lamaran siswa ke lowongan.
 | id | BIGSERIAL PK | |
 | job_listing_id | BIGINT FK → job_listings(id) | CASCADE delete |
 | student_id | BIGINT FK → students(id) | CASCADE delete |
-| status | VARCHAR(255) DEFAULT 'pending' | Lihat status workflow |
+| status | VARCHAR(255) DEFAULT 'pending' | `ApplicationStatus` enum — lihat status workflow |
 | notes | TEXT NULL | |
 | applied_at | TIMESTAMP NOT NULL | |
 | reviewed_at | TIMESTAMP NULL | |

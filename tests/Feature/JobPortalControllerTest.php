@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\JobListing;
 use App\Models\SswCategory;
+use App\Models\Student;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -185,5 +187,41 @@ class JobPortalControllerTest extends TestCase
         $response = $this->get(route('portal.index'));
 
         $response->assertStatus(200);
+    }
+
+    public function test_show_renders_apply_form_pointing_to_student_apply_route(): void
+    {
+        $user = User::factory()->create(['role' => 'student']);
+        Student::factory()->create(['user_id' => $user->id]);
+        $job = JobListing::factory()->open()->create([
+            'title' => 'Portal Apply Job',
+            'deadline' => now()->addMonth(),
+        ]);
+
+        $response = $this->actingAs($user)->get(route('portal.show', $job));
+
+        $response->assertStatus(200);
+        $response->assertSee('Portal Apply Job');
+        $response->assertSee(route('student.jobs.apply', $job));
+    }
+
+    public function test_student_can_apply_from_public_portal_detail_page(): void
+    {
+        $user = User::factory()->create(['role' => 'student']);
+        $student = Student::factory()->create(['user_id' => $user->id]);
+        $job = JobListing::factory()->open()->create([
+            'title' => 'Portal End To End Job',
+            'deadline' => now()->addMonth(),
+        ]);
+
+        $response = $this->actingAs($user)->post(route('student.jobs.apply', $job));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('job_applications', [
+            'job_listing_id' => $job->id,
+            'student_id' => $student->id,
+            'status' => 'pending',
+        ]);
     }
 }

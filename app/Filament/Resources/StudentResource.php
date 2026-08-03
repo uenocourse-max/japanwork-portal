@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\JlptLevel;
+use App\Enums\MatchingStatus;
 use App\Filament\Resources\StudentResource\Pages;
 use App\Models\SswCategory;
 use App\Models\Student;
@@ -116,7 +118,7 @@ class StudentResource extends Resource
                             ->maxValue(480),
                         Forms\Components\Select::make('jlpt_level')
                             ->label('Level JLPT')
-                            ->options(['N5' => 'N5', 'N4' => 'N4', 'N3' => 'N3', 'N2' => 'N2', 'N1' => 'N1', 'JFT Basic A2' => 'JFT Basic A2'])
+                            ->options(JlptLevel::options())
                             ->nullable(),
                         Forms\Components\TextInput::make('japanese_learning_months')
                             ->label('Lama Belajar Bahasa Jepang (bulan)')
@@ -153,21 +155,15 @@ class StudentResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('matching_status')
                             ->label('Status Matching')
-                            ->options([
-                                'not_matched' => 'Belum Matched',
-                                'process_matching' => 'Proses Matching',
-                                'waiting_result' => 'Menunggu Hasil',
-                                'matched' => 'Matched',
-                                'cancelled' => 'Dibatalkan',
-                            ])
+                            ->options(MatchingStatus::options())
                             ->required()
-                            ->default('not_matched')
+                            ->default(MatchingStatus::NotMatched->value)
                             ->live(),
                         Forms\Components\TextInput::make('matched_company_name')
                             ->label('Nama Perusahaan')
                             ->maxLength(255)
                             ->nullable()
-                            ->visible(fn (Get $get) => $get('matching_status') === 'matched'),
+                            ->visible(fn (Get $get) => $get('matching_status') === MatchingStatus::Matched->value),
                     ])->columns(2),
 
                 Section::make('Dokumen')
@@ -204,15 +200,9 @@ class StudentResource extends Resource
                     ->label('JLPT')
                     ->sortable()
                     ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'N1' => 'danger',
-                        'N2' => 'warning',
-                        'N3' => 'info',
-                        'N4' => 'success',
-                        'N5' => 'gray',
-                        'JFT Basic A2' => 'info',
-                        default => 'gray',
-                    }),
+                    ->color(fn (?string $state): string => $state
+                        ? (JlptLevel::tryFrom($state)?->color() ?? 'gray')
+                        : 'gray'),
                 Tables\Columns\TextColumn::make('sswCategories.name')
                     ->label('SSW')
                     ->badge()
@@ -232,15 +222,12 @@ class StudentResource extends Resource
                     ->label('Matching')
                     ->sortable()
                     ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'matched' => 'success',
-                        'process_matching' => 'warning',
-                        'waiting_result' => 'info',
-                        'not_matched' => 'gray',
-                        'cancelled' => 'danger',
-                        default => 'gray',
-                    })
-                    ->formatStateUsing(fn (?string $state): string => str_replace('_', ' ', ucfirst($state ?? ''))),
+                    ->color(fn (?string $state): string => $state
+                        ? (MatchingStatus::tryFrom($state)?->color() ?? 'gray')
+                        : 'gray')
+                    ->formatStateUsing(fn (?string $state): string => $state
+                        ? (MatchingStatus::tryFrom($state)?->label() ?? ucfirst(str_replace('_', ' ', $state)))
+                        : ''),
                 Tables\Columns\TextColumn::make('matched_company_name')
                     ->label('Perusahaan')
                     ->placeholder('-')
@@ -258,16 +245,10 @@ class StudentResource extends Resource
                     ->options(['male' => 'Laki-laki', 'female' => 'Perempuan']),
                 Tables\Filters\SelectFilter::make('jlpt_level')
                     ->label('JLPT')
-                    ->options(['N5' => 'N5', 'N4' => 'N4', 'N3' => 'N3', 'N2' => 'N2', 'N1' => 'N1', 'JFT Basic A2' => 'JFT Basic A2']),
+                    ->options(JlptLevel::options()),
                 Tables\Filters\SelectFilter::make('matching_status')
                     ->label('Status Matching')
-                    ->options([
-                        'process_matching' => 'Proses Matching',
-                        'matched' => 'Matched',
-                        'waiting_result' => 'Menunggu Hasil',
-                        'not_matched' => 'Belum Matching',
-                        'cancelled' => 'Dibatalkan',
-                    ]),
+                    ->options(MatchingStatus::options()),
                 Tables\Filters\SelectFilter::make('participant_status')
                     ->label('Status Peserta')
                     ->options(['ex' => 'Eks', 'new_comer' => 'New Comer']),
@@ -283,29 +264,17 @@ class StudentResource extends Resource
                 Actions\Action::make('changeMatchingStatus')
                     ->label('Ubah Status')
                     ->icon('heroicon-o-arrow-path')
-                    ->color(fn ($record): string => match ($record->matching_status) {
-                        'matched' => 'success',
-                        'process_matching' => 'warning',
-                        'waiting_result' => 'info',
-                        'cancelled' => 'danger',
-                        default => 'gray',
-                    })
+                    ->color(fn ($record): string => MatchingStatus::tryFrom($record->matching_status)?->color() ?? 'gray')
                     ->form([
                         Forms\Components\Select::make('matching_status')
                             ->label('Status Matching')
-                            ->options([
-                                'process_matching' => 'Proses Matching',
-                                'matched' => 'Matched',
-                                'waiting_result' => 'Menunggu Hasil',
-                                'not_matched' => 'Belum Matching',
-                                'cancelled' => 'Dibatalkan',
-                            ])
+                            ->options(MatchingStatus::options())
                             ->required()
                             ->live(),
                         Forms\Components\TextInput::make('matched_company_name')
                             ->label('Nama Perusahaan')
-                            ->requiredIf('matching_status', 'matched')
-                            ->visible(fn (Get $get) => $get('matching_status') === 'matched')
+                            ->requiredIf('matching_status', MatchingStatus::Matched->value)
+                            ->visible(fn (Get $get) => $get('matching_status') === MatchingStatus::Matched->value)
                             ->maxLength(255),
                     ])
                     ->action(function ($record, array $data): void {

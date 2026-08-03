@@ -107,28 +107,8 @@
                                         @endif
                                     </td>
                                     <td class="py-3">
-                                        <x-filament::badge :color="match($application->status) {
-                                            'pending' => 'warning',
-                                            'reviewed' => 'info',
-                                            'accepted' => 'success',
-                                            'interview_scheduled' => 'info',
-                                            'company_accepted' => 'success',
-                                            'not_passed' => 'danger',
-                                            'rejected' => 'danger',
-                                            'withdrawn' => 'gray',
-                                            default => 'gray',
-                                        }">
-                                            {{ match($application->status) {
-                                                'pending' => 'Menunggu',
-                                                'reviewed' => 'Direview',
-                                                'accepted' => 'Diterima',
-                                                'interview_scheduled' => 'Interview',
-                                                'company_accepted' => 'Diterima Perusahaan',
-                                                'not_passed' => 'Tidak Lolos',
-                                                'rejected' => 'Ditolak',
-                                                'withdrawn' => 'Ditarik',
-                                                default => ucfirst($application->status),
-                                            } }}
+                                        <x-filament::badge :color="\App\Enums\ApplicationStatus::tryFrom($application->status)?->color() ?? 'gray'">
+                                            {{ \App\Enums\ApplicationStatus::tryFrom($application->status)?->label() ?? ucfirst($application->status) }}
                                         </x-filament::badge>
                                     </td>
                                     <td class="py-3 text-xs text-gray-500 dark:text-gray-400">

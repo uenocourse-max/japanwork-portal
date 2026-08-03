@@ -54,7 +54,7 @@
                     </div>
                     <div class="flex justify-between">
                         <dt class="text-gray-500">Jenis Lowongan</dt>
-                        <dd class="font-medium">{{ match($job->job_type) { 'magang' => 'Magang', 'tg' => 'Tokutei Ginou (SSW)', 'engineer' => 'Engineer / Gijinkoku', default => $job->job_type } }}</dd>
+                        <dd class="font-medium">{{ \App\Enums\JobType::tryFrom($job->job_type)?->label() ?? $job->job_type }}</dd>
                     </div>
                     <div class="flex justify-between">
                         <dt class="text-gray-500">JLPT Diperlukan</dt>
@@ -102,7 +102,7 @@
                         <p class="text-blue-700 font-medium">Anda sudah melamar</p>
                         @if ($application)
                             <p class="text-sm text-blue-600 mt-1">Status:
-                                <span class="font-semibold">{{ match($application->status) { 'pending' => 'Menunggu', 'reviewed' => 'Direview', 'interview_scheduled' => 'Jadwal Interview', 'waiting_interview_result' => 'Menunggu Hasil Interview', 'accepted' => 'Diterima', 'rejected' => 'Ditolak', default => $application->status } }}</span>
+                                <span class="font-semibold">{{ \App\Enums\ApplicationStatus::tryFrom($application->status)?->label() ?? $application->status }}</span>
                             </p>
                         @endif
                     </div>

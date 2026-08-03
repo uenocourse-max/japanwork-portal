@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\JobListings\Schemas;
 
+use App\Enums\JlptLevel;
+use App\Enums\JobStatus;
+use App\Enums\JobType;
 use App\Models\SswCategory;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
@@ -71,22 +74,18 @@ class JobListingForm
                             ->label('Kategori SSW')
                             ->options(SswCategory::pluck('name', 'id'))
                             ->nullable()
-                            ->visible(fn (Get $get): bool => $get('job_type') === 'tg')
-                            ->required(fn (Get $get): bool => $get('job_type') === 'tg')
+                            ->visible(fn (Get $get): bool => $get('job_type') === JobType::TokuteiGinou->value)
+                            ->required(fn (Get $get): bool => $get('job_type') === JobType::TokuteiGinou->value)
                             ->preload(),
                         Forms\Components\Select::make('job_type')
                             ->label('Jenis Lowongan')
-                            ->options([
-                                'magang' => 'Magang',
-                                'tg' => 'Tokutei Ginou (SSW)',
-                                'engineer' => 'Engineer / Gijinkoku',
-                            ])
+                            ->options(JobType::options())
                             ->live()
                             ->required()
-                            ->default('tg'),
+                            ->default(JobType::TokuteiGinou->value),
                         Forms\Components\Select::make('jlpt_level_required')
                             ->label('Level JLPT Diperlukan')
-                            ->options(['N5' => 'N5', 'N4' => 'N4', 'N3' => 'N3', 'N2' => 'N2', 'N1' => 'N1', 'JFT Basic A2' => 'JFT Basic A2'])
+                            ->options(JlptLevel::options())
                             ->nullable(),
                         Forms\Components\Select::make('participant_status_required')
                             ->label('Status Peserta')
@@ -98,14 +97,9 @@ class JobListingForm
                     ->schema([
                         Forms\Components\Select::make('status')
                             ->label('Status')
-                            ->options([
-                                'draft' => 'Draft',
-                                'open' => 'Dibuka',
-                                'closed' => 'Ditutup',
-                                'filled' => 'Terisi',
-                            ])
+                            ->options(JobStatus::options())
                             ->required()
-                            ->default('draft'),
+                            ->default(JobStatus::Draft->value),
                         Forms\Components\DatePicker::make('deadline')
                             ->label('Deadline')
                             ->nullable(),

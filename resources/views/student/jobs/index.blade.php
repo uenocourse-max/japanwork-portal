@@ -44,14 +44,14 @@
                 </select>
                 <select name="job_type" class="bg-gray-50 border-0 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-blue-500" data-auto-submit>
                     <option value="">Semua Jenis</option>
-                    <option value="magang" {{ request('job_type') === 'magang' ? 'selected' : '' }}>Magang</option>
-                    <option value="tg" {{ request('job_type') === 'tg' ? 'selected' : '' }}>Tokutei Ginou (SSW)</option>
-                    <option value="engineer" {{ request('job_type') === 'engineer' ? 'selected' : '' }}>Engineer / Gijinkoku</option>
+                    @foreach (\App\Enums\JobType::options() as $value => $label)
+                        <option value="{{ $value }}" {{ request('job_type') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
                 </select>
                 <select name="jlpt_level" class="bg-gray-50 border-0 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-blue-500" data-auto-submit>
                     <option value="">Semua JLPT</option>
-                    @foreach (['N5', 'N4', 'N3', 'N2', 'N1', 'JFT Basic A2'] as $level)
-                        <option value="{{ $level }}" {{ request('jlpt_level') === $level ? 'selected' : '' }}>{{ $level }}</option>
+                    @foreach (\App\Enums\JlptLevel::options() as $value => $label)
+                        <option value="{{ $value }}" {{ request('jlpt_level') === $value ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
                 </select>
                 <div class="flex gap-2">

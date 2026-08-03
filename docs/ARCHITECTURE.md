@@ -83,6 +83,22 @@ Browse lowongan tanpa autentikasi. Sidebar menampilkan:
 
 ---
 
+## Enums (App\Enums)
+
+Enum PHP sebagai **single source of truth** untuk semua status/tipe yang sebelumnya berupa string mentah. Setiap enum memiliki `label()` (teks UI Bahasa Indonesia), `color()` (warna badge), dan `options()` (map value → label untuk form select/filter).
+
+| Enum | Values | Konteks |
+|---|---|---|
+| `ApplicationStatus` | `pending`, `reviewed`, `accepted`, `interview_scheduled`, `company_accepted`, `not_passed`, `rejected`, `withdrawn` | Status lamaran (job_applications) |
+| `JobStatus` | `draft`, `open`, `closed`, `filled` | Status lowongan; plus `optionsExcept(self ...$exclude)` agar `filled` tidak bisa dipilih di form recruiter |
+| `JobType` | `magang`, `tg`, `engineer` | Jenis lowongan; plus `tableLabel()` untuk badge ringkas |
+| `MatchingStatus` | `not_matched`, `process_matching`, `waiting_result`, `matched`, `cancelled` | Status matching siswa |
+| `JlptLevel` | `N1`–`N5`, `JFT Basic A2` | Level JLPT (`label()` = value) |
+
+**Konteks label yang disatukan:** `reviewed` → "Direview", `interview_scheduled` → "Interview Terjadwal". Dipakai di Filament (tables, forms, filters, actions, widgets), view Blade (student/portal/recruiter), controllers, notification, command, dan factories.
+
+---
+
 ## Models
 
 ### User
@@ -97,12 +113,14 @@ Browse lowongan tanpa autentikasi. Sidebar menampilkan:
 - **Methods**: `isProfileComplete()`, `hasSswCategory()`
 
 ### JobListing
-- **Fillable**: 17 fields — title, description, requirements, salary_min/max, location, company_name/description, thumbnail_url, ssw_category_id, jlpt_level_required, participant_status_required, status (draft/open/closed/filled), job_type (magang/tg/engineer), posted_by, deadline
+- **Fillable**: 17 fields — title, description, requirements, salary_min/max, location, company_name/description, thumbnail_url, ssw_category_id, jlpt_level_required, participant_status_required, status, job_type, posted_by, deadline
+- **Status/job_type**: `JobStatus` & `JobType` enum (bukan string mentah)
 - **Relations**: `poster()`, `sswCategory()`, `applications()`, `savedByStudents()`, `applicants()`
 - **Accessors**: `thumbnail_display_url` (Google Drive → direct link)
+- **Scopes**: `scopeAvailable()` — status `JobStatus::Open` & deadline belum lewat
 
 ### JobApplication
-- **Status workflow**: `pending` → `reviewed` → `accepted` → `interview_scheduled` → `company_accepted` | `not_passed` | `rejected`
+- **Status workflow**: `ApplicationStatus` enum (`pending` → `reviewed` → `accepted` → `interview_scheduled` → `company_accepted` | `not_passed` | `rejected` | `withdrawn`)
 - **Relations**: `jobListing()`, `student()`
 
 ### SswCategory
@@ -167,11 +185,11 @@ Browse lowongan tanpa autentikasi. Sidebar menampilkan:
 ## Testing
 
 - PHPUnit 12
-- 10 test files, 70 tests, 140 assertions
+- 10 test files, 74 tests, 157 assertions
 - Database: SQLite in-memory (`DB_CONNECTION=sqlite`, `DB_DATABASE=:memory:`)
 - RefreshDatabase trait used
-- `StudentFactory`: jlpt_level tanpa `JFT Basic A2` (kompatibel SQLite CHECK)
-- Coverage: LoginTest (8), RegisterTest (8), JobControllerTest (9), JobPortalControllerTest (11), ApplicationControllerTest (8), SavedJobControllerTest (6), StudentProfileControllerTest (7), StudentDashboardControllerTest (3), EnsureStudentProfileCompleteTest (5), ArchiveExpiredJobsCommandTest (3)
+- `StudentFactory`: jlpt_level hanya N1–N5 (tanpa `JFT Basic A2`, kompatibel SQLite CHECK)
+- Coverage: LoginTest, RegisterTest, JobControllerTest, JobPortalControllerTest, ApplicationControllerTest, SavedJobControllerTest, StudentProfileControllerTest, StudentDashboardControllerTest, EnsureStudentProfileCompleteTest, ArchiveExpiredJobsCommandTest, LpkTskResourceTest
 - Run: `php artisan test --compact`
 
 ---

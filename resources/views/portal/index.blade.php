@@ -49,9 +49,9 @@
                             <div class="md:col-span-4">
                                 <select name="job_type" class="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl text-gray-700 text-sm focus:ring-2 focus:ring-blue-500 appearance-none" data-auto-submit>
                                     <option value="">Semua Jenis</option>
-                                    <option value="magang" {{ request('job_type') === 'magang' ? 'selected' : '' }}>Magang</option>
-                                    <option value="tg" {{ request('job_type') === 'tg' ? 'selected' : '' }}>Tokutei Ginou (SSW)</option>
-                                    <option value="engineer" {{ request('job_type') === 'engineer' ? 'selected' : '' }}>Engineer / Gijinkoku</option>
+                                    @foreach (\App\Enums\JobType::options() as $value => $label)
+                                        <option value="{{ $value }}" {{ request('job_type') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="md:col-span-3">

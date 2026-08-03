@@ -22,12 +22,13 @@ class CreateStudent extends CreateRecord
             'email' => 'required|email|unique:users,email',
         ])->validate();
 
-        $user = User::create([
+        $user = User::make([
             'name' => $userData['name'] ?? '',
             'email' => $userData['email'] ?? '',
             'password' => Hash::make($userData['password'] ?? 'password'),
-            'role' => 'student',
         ]);
+        $user->forceFill(['role' => 'student']);
+        $user->save();
 
         $data['user_id'] = $user->id;
 

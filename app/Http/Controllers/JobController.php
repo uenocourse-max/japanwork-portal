@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\JobStatus;
+use App\Enums\JobType;
 use App\Models\JobApplication;
 use App\Models\JobListing;
 use App\Models\SswCategory;
@@ -52,7 +54,7 @@ class JobController extends Controller
 
     public function show(JobListing $job)
     {
-        if ($job->status !== 'open' || ($job->deadline && $job->deadline->isPast())) {
+        if ($job->status !== JobStatus::Open->value || ($job->deadline && $job->deadline->isPast())) {
             abort(404);
         }
 
@@ -69,7 +71,7 @@ class JobController extends Controller
         }
 
         $hasApplied = (bool) $application;
-        $sswMismatch = $student && $job->job_type === 'tg' && ! $student->hasSswCategory($job->ssw_category_id);
+        $sswMismatch = $student && $job->job_type === JobType::TokuteiGinou->value && ! $student->hasSswCategory($job->ssw_category_id);
         $isSaved = $student && $student->savedJobs()->where('job_listing_id', $job->id)->exists();
 
         return view('student.jobs.show', compact('job', 'hasApplied', 'application', 'sswMismatch', 'isSaved'));
@@ -77,7 +79,7 @@ class JobController extends Controller
 
     public function apply(JobListing $job)
     {
-        if ($job->status !== 'open' || ($job->deadline && $job->deadline->isPast())) {
+        if ($job->status !== JobStatus::Open->value || ($job->deadline && $job->deadline->isPast())) {
             return back()->with('error', 'Lowongan ini sudah tidak tersedia.');
         }
 

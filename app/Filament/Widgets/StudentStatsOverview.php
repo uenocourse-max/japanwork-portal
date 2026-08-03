@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\MatchingStatus;
 use App\Models\Student;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -19,10 +20,10 @@ class StudentStatsOverview extends StatsOverviewWidget
         });
 
         $total = array_sum($stats);
-        $matched = $stats['matched'] ?? 0;
-        $processMatching = $stats['process_matching'] ?? 0;
-        $waitingResult = $stats['waiting_result'] ?? 0;
-        $notMatched = $stats['not_matched'] ?? 0;
+        $matched = $stats[MatchingStatus::Matched->value] ?? 0;
+        $processMatching = $stats[MatchingStatus::ProcessMatching->value] ?? 0;
+        $waitingResult = $stats[MatchingStatus::WaitingResult->value] ?? 0;
+        $notMatched = $stats[MatchingStatus::NotMatched->value] ?? 0;
 
         return [
             Stat::make('Total Siswa', $total)

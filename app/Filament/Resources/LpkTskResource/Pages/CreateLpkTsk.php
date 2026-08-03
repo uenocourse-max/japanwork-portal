@@ -16,12 +16,13 @@ class CreateLpkTsk extends CreateRecord
     protected function handleRecordCreation(array $data): Model
     {
         return DB::transaction(function () use ($data) {
-            $user = User::create([
+            $user = User::make([
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
-                'role' => 'recruiter',
             ]);
+            $user->forceFill(['role' => 'recruiter']);
+            $user->save();
 
             $data['password'] = Hash::make($data['password']);
             $data['user_id'] = $user->id;

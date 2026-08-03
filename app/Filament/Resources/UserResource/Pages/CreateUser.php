@@ -20,7 +20,11 @@ class CreateUser extends CreateRecord
 
         $data['password'] = Hash::make($data['password']);
 
-        return static::getModel()::create($data);
+        $user = static::getModel()::make($data);
+        $user->forceFill(['role' => $data['role'] ?? 'student']);
+        $user->save();
+
+        return $user;
     }
 
     protected function getRedirectUrl(): string

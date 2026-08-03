@@ -21,16 +21,19 @@
                         <div class="ml-4">
                             @php
                                 $statusConfig = [
-                                    'pending' => ['label' => 'Menunggu', 'class' => 'bg-yellow-100 text-yellow-800'],
-                                    'reviewed' => ['label' => 'Sudah Direview', 'class' => 'bg-yellow-100 text-yellow-800'],
-                                    'accepted' => ['label' => 'Diterima', 'class' => 'bg-green-100 text-green-800'],
-                                    'interview_scheduled' => ['label' => 'Jadwal Interview', 'class' => 'bg-orange-100 text-orange-800'],
-                                    'company_accepted' => ['label' => 'Diterima Perusahaan', 'class' => 'bg-blue-100 text-blue-800'],
-                                    'not_passed' => ['label' => 'Tidak Lolos', 'class' => 'bg-red-100 text-red-800'],
-                                    'rejected' => ['label' => 'Ditolak', 'class' => 'bg-red-100 text-red-800'],
-                                    'withdrawn' => ['label' => 'Ditarik', 'class' => 'bg-gray-100 text-gray-500'],
+                                    'pending' => 'bg-yellow-100 text-yellow-800',
+                                    'reviewed' => 'bg-yellow-100 text-yellow-800',
+                                    'accepted' => 'bg-green-100 text-green-800',
+                                    'interview_scheduled' => 'bg-orange-100 text-orange-800',
+                                    'company_accepted' => 'bg-blue-100 text-blue-800',
+                                    'not_passed' => 'bg-red-100 text-red-800',
+                                    'rejected' => 'bg-red-100 text-red-800',
+                                    'withdrawn' => 'bg-gray-100 text-gray-500',
                                 ];
-                                $status = $statusConfig[$application->status] ?? ['label' => $application->status, 'class' => 'bg-gray-100 text-gray-800'];
+                                $status = [
+                                    'label' => \App\Enums\ApplicationStatus::tryFrom($application->status)?->label() ?? $application->status,
+                                    'class' => $statusConfig[$application->status] ?? 'bg-gray-100 text-gray-800',
+                                ];
                             @endphp
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $status['class'] }}">
                                 {{ $status['label'] }}
@@ -39,9 +42,20 @@
                     </div>
                     <div class="mt-3">
                         @php
-                            $timelineStatuses = ['pending', 'reviewed', 'accepted', 'interview_scheduled', 'company_accepted'];
+                            $statusEnum = \App\Enums\ApplicationStatus::class;
+                            $timelineStatuses = [
+                                $statusEnum::Pending->value,
+                                $statusEnum::Reviewed->value,
+                                $statusEnum::Accepted->value,
+                                $statusEnum::InterviewScheduled->value,
+                                $statusEnum::CompanyAccepted->value,
+                            ];
                             $currentIndex = array_search($application->status, $timelineStatuses);
-                            $isTerminal = in_array($application->status, ['rejected', 'not_passed', 'withdrawn']);
+                            $isTerminal = in_array($application->status, [
+                                $statusEnum::Rejected->value,
+                                $statusEnum::NotPassed->value,
+                                $statusEnum::Withdrawn->value,
+                            ]);
 
                             $stepColors = [
                                 'pending' => ['active' => 'bg-yellow-400', 'line' => 'bg-yellow-400', 'text' => 'text-yellow-600', 'ring' => 'ring-yellow-200'],
@@ -50,19 +64,13 @@
                                 'interview_scheduled' => ['active' => 'bg-orange-500', 'line' => 'bg-orange-500', 'text' => 'text-orange-600', 'ring' => 'ring-orange-200'],
                                 'company_accepted' => ['active' => 'bg-blue-500', 'line' => 'bg-blue-500', 'text' => 'text-blue-600', 'ring' => 'ring-blue-200'],
                             ];
-                            $stepLabels = [
-                                'pending' => 'Menunggu',
-                                'reviewed' => 'Direview',
-                                'accepted' => 'Diterima',
-                                'interview_scheduled' => 'Interview',
-                                'company_accepted' => 'Lolos',
-                            ];
+                            $stepLabels = \App\Enums\ApplicationStatus::options();
                         @endphp
                         @if ($isTerminal)
                             <div class="flex items-center gap-2 text-sm text-red-600">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                 <span>
-                                    @if ($application->status === 'rejected')
+                                    @if ($application->status === $statusEnum::Rejected->value)
                                         Lamaran ditolak{{ $application->notes ? ': ' . $application->notes : '' }}
                                     @else
                                         Tidak lolos seleksi{{ $application->notes ? ': ' . $application->notes : '' }}
@@ -122,7 +130,7 @@
                             <span>Direview: {{ $application->reviewed_at->format('d M Y H:i') }}</span>
                         @endif
                     </div>
-                    @if ($application->status === 'pending')
+                    @if ($application->status === $statusEnum::Pending->value)
                         <div class="mt-3">
                             <form method="POST" action="{{ route('student.applications.withdraw', $application) }}" onsubmit="return confirm('Yakin ingin membatalkan lamaran ini?')">
                                 @csrf
@@ -131,7 +139,7 @@
                         </div>
                     @endif
 
-                    @if (in_array($application->status, ['interview_scheduled', 'company_accepted', 'not_passed']) && $application->interview_date)
+                    @if (in_array($application->status, [$statusEnum::InterviewScheduled->value, $statusEnum::CompanyAccepted->value, $statusEnum::NotPassed->value]) && $application->interview_date)
                         <div class="mt-3 border border-amber-200 rounded-lg p-3 bg-amber-50">
                             <div class="text-sm font-medium text-amber-800 mb-2">Detail Interview</div>
                             <div class="grid grid-cols-2 gap-2 text-xs text-amber-700">

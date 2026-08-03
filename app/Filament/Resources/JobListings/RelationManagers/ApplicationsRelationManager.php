@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\JobListings\RelationManagers;
 
+use App\Enums\ApplicationStatus;
+use App\Enums\JlptLevel;
+use App\Enums\MatchingStatus;
 use App\Filament\Recruiter\Resources\RecruiterApplications\Tables\RecruiterApplicationsTable;
 use App\Models\JobApplication;
 use App\Notifications\InterviewScheduleChanged;
@@ -40,15 +43,9 @@ class ApplicationsRelationManager extends RelationManager
                 TextColumn::make('student.jlpt_level')
                     ->label('JLPT')
                     ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'N1' => 'danger',
-                        'N2' => 'warning',
-                        'N3' => 'info',
-                        'N4' => 'success',
-                        'N5' => 'gray',
-                        'JFT Basic A2' => 'info',
-                        default => 'gray',
-                    })
+                    ->color(fn (?string $state): string => $state
+                        ? (JlptLevel::tryFrom($state)?->color() ?? 'gray')
+                        : 'gray')
                     ->placeholder('-'),
                 TextColumn::make('student.phone_number')
                     ->label('Telepon')
@@ -56,18 +53,14 @@ class ApplicationsRelationManager extends RelationManager
                 TextColumn::make('student.matching_status')
                     ->label('Status Matching')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'matched' => 'success',
-                        'process_matching' => 'warning',
-                        'waiting_result' => 'info',
-                        'not_matched' => 'gray',
-                        'cancelled' => 'danger',
-                    }),
+                    ->color(fn (?string $state): string => $state
+                        ? (MatchingStatus::tryFrom($state)?->color() ?? 'gray')
+                        : 'gray'),
                 TextColumn::make('status')
                     ->label('Status Lamaran')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => RecruiterApplicationsTable::getStatusLabel($state))
-                    ->color(fn (string $state): string => RecruiterApplicationsTable::getStatusColor($state)),
+                    ->formatStateUsing(fn (string $state): string => ApplicationStatus::tryFrom($state)?->label() ?? ucfirst($state))
+                    ->color(fn (string $state): string => ApplicationStatus::tryFrom($state)?->color() ?? 'gray'),
                 TextColumn::make('notes')
                     ->label('Catatan')
                     ->limit(50)
@@ -81,15 +74,7 @@ class ApplicationsRelationManager extends RelationManager
             ->filters([
                 SelectFilter::make('status')
                     ->label('Status')
-                    ->options([
-                        'pending' => 'Menunggu',
-                        'reviewed' => 'Sudah Direview',
-                        'accepted' => 'Diterima',
-                        'interview_scheduled' => 'Jadwal Interview',
-                        'company_accepted' => 'Diterima Perusahaan',
-                        'not_passed' => 'Tidak Lolos',
-                        'rejected' => 'Ditolak',
-                    ]),
+                    ->options(ApplicationStatus::options()),
             ])
             ->recordActions([
                 Action::make('review')
@@ -99,7 +84,7 @@ class ApplicationsRelationManager extends RelationManager
                     ->requiresConfirmation()
                     ->modalHeading('Review Lamaran')
                     ->modalDescription('Tandai lamaran ini sudah direview.')
-                    ->visible(fn ($record): bool => $record->status === 'pending')
+                    ->visible(fn ($record): bool => $record->status === ApplicationStatus::Pending->value)
                     ->schema([
                         Textarea::make('notes')
                             ->label('Catatan')
@@ -109,7 +94,7 @@ class ApplicationsRelationManager extends RelationManager
                     ->action(function ($record, array $data): void {
                         $oldStatus = $record->status;
                         $record->update([
-                            'status' => 'reviewed',
+                            'status' => ApplicationStatus::Reviewed->value,
                             'notes' => $data['notes'] ?: $record->notes,
                             'reviewed_at' => now(),
                         ]);
@@ -122,7 +107,7 @@ class ApplicationsRelationManager extends RelationManager
                     ->requiresConfirmation()
                     ->modalHeading('Terima Lamaran')
                     ->modalDescription('Lamaran ini akan diproses ke tahap interview.')
-                    ->visible(fn ($record): bool => $record->status === 'reviewed')
+                    ->visible(fn ($record): bool => $record->status === ApplicationStatus::Reviewed->value)
                     ->schema([
                         Textarea::make('notes')
                             ->label('Catatan')
@@ -132,7 +117,7 @@ class ApplicationsRelationManager extends RelationManager
                     ->action(function ($record, array $data): void {
                         $oldStatus = $record->status;
                         $record->update([
-                            'status' => 'accepted',
+                            'status' => ApplicationStatus::Accepted->value,
                             'notes' => $data['notes'] ?: $record->notes,
                             'reviewed_at' => $record->reviewed_at ?? now(),
                         ]);
@@ -144,7 +129,7 @@ class ApplicationsRelationManager extends RelationManager
                     ->color('warning')
                     ->modalHeading('Jadwalkan Interview')
                     ->modalDescription('Isi detail jadwal interview.')
-                    ->visible(fn ($record): bool => $record->status === 'accepted')
+                    ->visible(fn ($record): bool => $record->status === ApplicationStatus::Accepted->value)
                     ->form([
                         Select::make('interview_type')
                             ->label('Jenis Interview')
@@ -166,7 +151,7 @@ class ApplicationsRelationManager extends RelationManager
                     ->action(function ($record, array $data): void {
                         $oldStatus = $record->status;
                         $record->update([
-                            'status' => 'interview_scheduled',
+                            'status' => ApplicationStatus::InterviewScheduled->value,
                             'interview_type' => $data['interview_type'],
                             'interview_date' => $data['interview_date'],
                             'interview_location' => $data['interview_location'],
@@ -181,7 +166,7 @@ class ApplicationsRelationManager extends RelationManager
                     ->color('primary')
                     ->modalHeading('Edit Jadwal Interview')
                     ->modalDescription('Ubah detail jadwal interview yang sudah dijadwalkan.')
-                    ->visible(fn ($record): bool => $record->status === 'interview_scheduled')
+                    ->visible(fn ($record): bool => $record->status === ApplicationStatus::InterviewScheduled->value)
                     ->form(fn (JobApplication $record): array => [
                         Select::make('interview_type')
                             ->label('Jenis Interview')
@@ -237,13 +222,13 @@ class ApplicationsRelationManager extends RelationManager
                     ->color('info')
                     ->modalHeading('Input Hasil Interview')
                     ->modalDescription('Pilih hasil akhir interview.')
-                    ->visible(fn ($record): bool => $record->status === 'interview_scheduled')
+                    ->visible(fn ($record): bool => $record->status === ApplicationStatus::InterviewScheduled->value)
                     ->form([
                         Select::make('result')
                             ->label('Hasil')
                             ->options([
-                                'company_accepted' => 'Diterima Perusahaan',
-                                'not_passed' => 'Tidak Lolos',
+                                ApplicationStatus::CompanyAccepted->value => 'Diterima Perusahaan',
+                                ApplicationStatus::NotPassed->value => 'Tidak Lolos',
                             ])
                             ->required(),
                         Textarea::make('notes')
@@ -258,11 +243,11 @@ class ApplicationsRelationManager extends RelationManager
                             'notes' => $data['notes'] ?: $record->notes,
                         ]);
 
-                        if ($newStatus === 'company_accepted') {
+                        if ($newStatus === ApplicationStatus::CompanyAccepted->value) {
                             $student = $record->student;
                             if ($student) {
                                 $student->update([
-                                    'matching_status' => 'matched',
+                                    'matching_status' => MatchingStatus::Matched->value,
                                     'matched_company_name' => $record->jobListing->company_name,
                                 ]);
                             }
@@ -277,7 +262,11 @@ class ApplicationsRelationManager extends RelationManager
                     ->requiresConfirmation()
                     ->modalHeading('Tolak Lamaran')
                     ->modalDescription('Lamaran siswa ini akan ditolak.')
-                    ->visible(fn ($record): bool => ! in_array($record->status, ['company_accepted', 'not_passed', 'rejected']))
+                    ->visible(fn ($record): bool => ! in_array($record->status, [
+                        ApplicationStatus::CompanyAccepted->value,
+                        ApplicationStatus::NotPassed->value,
+                        ApplicationStatus::Rejected->value,
+                    ]))
                     ->schema([
                         Textarea::make('notes')
                             ->label('Catatan')
@@ -287,7 +276,7 @@ class ApplicationsRelationManager extends RelationManager
                     ->action(function ($record, array $data): void {
                         $oldStatus = $record->status;
                         $record->update([
-                            'status' => 'rejected',
+                            'status' => ApplicationStatus::Rejected->value,
                             'notes' => $data['notes'] ?: $record->notes,
                             'reviewed_at' => $record->reviewed_at ?? now(),
                         ]);

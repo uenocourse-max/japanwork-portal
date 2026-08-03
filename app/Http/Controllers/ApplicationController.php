@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ApplicationStatus;
 use App\Models\JobApplication;
 use Illuminate\Http\Request;
 
@@ -43,11 +44,11 @@ class ApplicationController extends Controller
             abort(403);
         }
 
-        if ($application->status !== 'pending') {
+        if ($application->status !== ApplicationStatus::Pending->value) {
             return back()->with('error', 'Lamaran sudah direview dan tidak bisa ditarik.');
         }
 
-        $application->update(['status' => 'withdrawn']);
+        $application->update(['status' => ApplicationStatus::Withdrawn->value]);
 
         return back()->with('success', 'Lamaran berhasil ditarik.');
     }

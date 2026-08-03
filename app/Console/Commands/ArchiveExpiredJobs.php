@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\JobStatus;
 use App\Models\JobListing;
 use Illuminate\Console\Command;
 
@@ -13,10 +14,10 @@ class ArchiveExpiredJobs extends Command
 
     public function handle(): int
     {
-        $count = JobListing::where('status', 'open')
+        $count = JobListing::where('status', JobStatus::Open->value)
             ->whereNotNull('deadline')
             ->where('deadline', '<', now())
-            ->update(['status' => 'closed']);
+            ->update(['status' => JobStatus::Closed->value]);
 
         $this->info("{$count} lowongan expired telah diarsipkan (status: closed).");
 

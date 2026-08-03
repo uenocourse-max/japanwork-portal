@@ -217,12 +217,13 @@ class DemoSeeder extends Seeder
         ];
 
         foreach ($studentData as $data) {
-            $user = User::create([
+            $user = User::make([
                 'name' => $data['name'],
                 'email' => strtolower(str_replace(' ', '.', $data['name'])).'@example.com',
                 'password' => Hash::make('password'),
-                'role' => 'student',
             ]);
+            $user->forceFill(['role' => 'student']);
+            $user->save();
 
             $student = Student::create([
                 'user_id' => $user->id,

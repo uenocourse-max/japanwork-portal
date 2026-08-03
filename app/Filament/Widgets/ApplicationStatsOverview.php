@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\ApplicationStatus;
 use App\Models\JobApplication;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -25,19 +26,19 @@ class ApplicationStatsOverview extends StatsOverviewWidget
                 ->description('Jumlah seluruh lamaran')
                 ->descriptionIcon('heroicon-m-clipboard-document-list')
                 ->color('primary'),
-            Stat::make('Menunggu', $stats['pending'] ?? 0)
+            Stat::make('Menunggu', $stats[ApplicationStatus::Pending->value] ?? 0)
                 ->description('Lamaran belum direview')
                 ->descriptionIcon('heroicon-m-clock')
                 ->color('warning'),
-            Stat::make('Interview', $stats['interview_scheduled'] ?? 0)
+            Stat::make('Interview', $stats[ApplicationStatus::InterviewScheduled->value] ?? 0)
                 ->description('Dalam tahap interview')
                 ->descriptionIcon('heroicon-m-calendar')
                 ->color('warning'),
-            Stat::make('Diterima Perusahaan', $stats['company_accepted'] ?? 0)
+            Stat::make('Diterima Perusahaan', $stats[ApplicationStatus::CompanyAccepted->value] ?? 0)
                 ->description('Lamaran lolos seleksi')
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success'),
-            Stat::make('Ditarik', $stats['withdrawn'] ?? 0)
+            Stat::make('Ditarik', $stats[ApplicationStatus::Withdrawn->value] ?? 0)
                 ->description('Lamaran yang ditarik')
                 ->descriptionIcon('heroicon-m-x-circle')
                 ->color('danger'),

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Recruiter\Widgets;
 
+use App\Enums\ApplicationStatus;
 use App\Models\JobApplication;
 use Carbon\Carbon;
 use Filament\Tables\Columns\TextColumn;
@@ -21,7 +22,7 @@ class RecruiterUpcomingInterviewsWidget extends Widget
         return $table
             ->query(
                 JobApplication::whereHas('jobListing', fn ($q) => $q->where('posted_by', auth()->id()))
-                    ->where('status', 'interview_scheduled')
+                    ->where('status', ApplicationStatus::InterviewScheduled->value)
                     ->where('interview_date', '>=', Carbon::now()->startOfDay())
                     ->with('student', 'jobListing')
                     ->orderBy('interview_date')

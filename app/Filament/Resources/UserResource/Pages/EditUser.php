@@ -32,7 +32,9 @@ class EditUser extends EditRecord
             unset($data['password']);
         }
 
-        $record->update($data);
+        $record->fill($data);
+        $record->forceFill(['role' => $data['role'] ?? $record->role]);
+        $record->save();
 
         return $record;
     }

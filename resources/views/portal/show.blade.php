@@ -115,8 +115,8 @@
                     <div class="flex justify-between items-center">
                         <dt class="text-sm text-gray-500">Jenis</dt>
                         <dd>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold {{ $job->job_type === 'magang' ? 'bg-blue-50 text-blue-700 border border-blue-100' : ($job->job_type === 'tg' ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-green-50 text-green-700 border border-green-100') }}">
-                                {{ match($job->job_type) { 'magang' => 'Magang', 'tg' => 'Tokutei Ginou (SSW)', 'engineer' => 'Engineer / Gijinkoku', default => $job->job_type } }}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold {{ $job->job_type === \App\Enums\JobType::Magang->value ? 'bg-blue-50 text-blue-700 border border-blue-100' : ($job->job_type === \App\Enums\JobType::TokuteiGinou->value ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-green-50 text-green-700 border border-green-100') }}">
+                                {{ \App\Enums\JobType::tryFrom($job->job_type)?->label() ?? $job->job_type }}
                             </span>
                         </dd>
                     </div>
@@ -168,7 +168,7 @@
             <div class="px-6 pb-6 space-y-3">
                 @auth
                     @if (Auth::user()->role === 'student')
-                        <form method="POST" action="{{ route('portal.apply', $job) }}" id="portal-apply-form">
+                        <form method="POST" action="{{ route('student.jobs.apply', $job) }}" id="portal-apply-form">
                             @csrf
                             <input type="hidden" name="confirmed" value="1">
                             <button type="submit" class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2" id="portal-apply-btn">

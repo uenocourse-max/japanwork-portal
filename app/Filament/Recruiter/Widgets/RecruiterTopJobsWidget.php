@@ -2,6 +2,8 @@
 
 namespace App\Filament\Recruiter\Widgets;
 
+use App\Enums\JobStatus;
+use App\Enums\JobType;
 use App\Filament\Recruiter\Resources\RecruiterJobListingResource;
 use App\Models\JobListing;
 use Filament\Actions\Action;
@@ -33,19 +35,9 @@ class RecruiterTopJobsWidget extends Widget
                     ->weight('bold'),
                 TextColumn::make('job_type')
                     ->label('Tipe')
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'magang' => 'Magang',
-                        'tg' => 'Tokutei Ginou',
-                        'engineer' => 'Engineer',
-                        default => ucfirst($state),
-                    })
+                    ->formatStateUsing(fn (string $state): string => JobType::tryFrom($state)?->tableLabel() ?? ucfirst($state))
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'magang' => 'warning',
-                        'tg' => 'info',
-                        'engineer' => 'success',
-                        default => 'gray',
-                    }),
+                    ->color(fn (string $state): string => JobType::tryFrom($state)?->color() ?? 'gray'),
                 TextColumn::make('location')
                     ->label('Lokasi')
                     ->limit(15),
@@ -57,21 +49,9 @@ class RecruiterTopJobsWidget extends Widget
                     ->color('primary'),
                 TextColumn::make('status')
                     ->label('Status')
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'open' => 'Aktif',
-                        'draft' => 'Draft',
-                        'closed' => 'Ditutup',
-                        'filled' => 'Terisi',
-                        default => ucfirst($state),
-                    })
+                    ->formatStateUsing(fn (string $state): string => JobStatus::tryFrom($state)?->label() ?? ucfirst($state))
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'open' => 'success',
-                        'draft' => 'gray',
-                        'closed' => 'danger',
-                        'filled' => 'warning',
-                        default => 'gray',
-                    }),
+                    ->color(fn (string $state): string => JobStatus::tryFrom($state)?->color() ?? 'gray'),
                 TextColumn::make('deadline')
                     ->label('Deadline')
                     ->date('d M Y')

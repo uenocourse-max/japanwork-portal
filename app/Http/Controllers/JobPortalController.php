@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\JobStatus;
+use App\Enums\JobType;
 use App\Models\JobListing;
 use App\Models\SswCategory;
 use Illuminate\Http\Request;
@@ -58,7 +60,7 @@ class JobPortalController extends Controller
 
     public function show(JobListing $job)
     {
-        if ($job->status !== 'open' || ($job->deadline && $job->deadline->isPast())) {
+        if ($job->status !== JobStatus::Open->value || ($job->deadline && $job->deadline->isPast())) {
             abort(404);
         }
 
@@ -79,7 +81,7 @@ class JobPortalController extends Controller
         $isSaved = false;
         if (Auth::check()) {
             $student = Auth::user()->student;
-            $sswMismatch = $student && $job->job_type === 'tg' && ! $student->hasSswCategory($job->ssw_category_id);
+            $sswMismatch = $student && $job->job_type === JobType::TokuteiGinou->value && ! $student->hasSswCategory($job->ssw_category_id);
             $isSaved = $student && $student->savedJobs()->where('job_listing_id', $job->id)->exists();
         }
 

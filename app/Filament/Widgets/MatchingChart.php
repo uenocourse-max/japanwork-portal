@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\MatchingStatus;
 use App\Models\Student;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\Cache;
@@ -28,12 +29,7 @@ class MatchingChart extends ChartWidget
                 ->toArray();
         });
 
-        $labels = [
-            'process_matching' => 'Proses Matching',
-            'matched' => 'Matched',
-            'waiting_result' => 'Menunggu Hasil',
-            'not_matched' => 'Belum Matching',
-        ];
+        $labels = MatchingStatus::options();
 
         return [
             'datasets' => [

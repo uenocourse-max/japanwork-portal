@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ApplicationStatus;
 use App\Models\JobApplication;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,12 +19,12 @@ class StudentDashboardController extends Controller
 
         $stats = [
             'total' => JobApplication::where('student_id', $student->id)->count(),
-            'pending' => JobApplication::where('student_id', $student->id)->where('status', 'pending')->count(),
-            'reviewed' => JobApplication::where('student_id', $student->id)->where('status', 'reviewed')->count(),
-            'accepted' => JobApplication::where('student_id', $student->id)->where('status', 'accepted')->count(),
-            'interview_scheduled' => JobApplication::where('student_id', $student->id)->where('status', 'interview_scheduled')->count(),
-            'company_accepted' => JobApplication::where('student_id', $student->id)->where('status', 'company_accepted')->count(),
-            'not_passed' => JobApplication::where('student_id', $student->id)->where('status', 'not_passed')->count(),
+            'pending' => JobApplication::where('student_id', $student->id)->where('status', ApplicationStatus::Pending->value)->count(),
+            'reviewed' => JobApplication::where('student_id', $student->id)->where('status', ApplicationStatus::Reviewed->value)->count(),
+            'accepted' => JobApplication::where('student_id', $student->id)->where('status', ApplicationStatus::Accepted->value)->count(),
+            'interview_scheduled' => JobApplication::where('student_id', $student->id)->where('status', ApplicationStatus::InterviewScheduled->value)->count(),
+            'company_accepted' => JobApplication::where('student_id', $student->id)->where('status', ApplicationStatus::CompanyAccepted->value)->count(),
+            'not_passed' => JobApplication::where('student_id', $student->id)->where('status', ApplicationStatus::NotPassed->value)->count(),
         ];
 
         $recentApplications = JobApplication::where('student_id', $student->id)
