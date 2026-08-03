@@ -4,26 +4,11 @@
 
 @section('content')
     @php
-        $statusLabels = [
-            'pending' => 'bg-yellow-100 text-yellow-800',
-            'reviewed' => 'bg-blue-100 text-blue-800',
-            'accepted' => 'bg-indigo-100 text-indigo-800',
-            'interview_scheduled' => 'bg-purple-100 text-purple-800',
-            'company_accepted' => 'bg-green-100 text-green-800',
-            'not_passed' => 'bg-red-100 text-red-800',
-            'rejected' => 'bg-red-100 text-red-800',
-            'withdrawn' => 'bg-gray-100 text-gray-600',
-        ];
+        $statusBadgeClass = fn (?string $status): string => \App\Enums\ApplicationStatus::tryFrom($status ?? '')?->badgeClass() ?? 'bg-gray-100 text-gray-600';
 
         $statusLabel = fn (?string $status): string => \App\Enums\ApplicationStatus::tryFrom($status ?? '')?->label() ?? $status;
 
-        $matchingLabels = [
-            'not_matched' => 'bg-gray-100 text-gray-600',
-            'process_matching' => 'bg-blue-100 text-blue-800',
-            'waiting_result' => 'bg-yellow-100 text-yellow-800',
-            'matched' => 'bg-green-100 text-green-800',
-            'cancelled' => 'bg-red-100 text-red-800',
-        ];
+        $matchingBadgeClass = fn (?string $status): string => \App\Enums\MatchingStatus::tryFrom($status ?? '')?->badgeClass() ?? 'bg-gray-100 text-gray-600';
 
         $matchingLabel = fn (?string $status): string => \App\Enums\MatchingStatus::tryFrom($status ?? '')?->label() ?? $status;
     @endphp
@@ -96,7 +81,7 @@
             @php
                 $matching = [
                     'label' => $matchingLabel($student->matching_status),
-                    'color' => $matchingLabels[$student->matching_status] ?? 'bg-gray-100 text-gray-600',
+                    'color' => $matchingBadgeClass($student->matching_status),
                 ];
             @endphp
             <div class="text-center py-4">
@@ -130,7 +115,7 @@
                             <p class="text-sm font-medium text-gray-800">{{ $app->jobListing->title }}</p>
                             <p class="text-xs text-gray-500">{{ $app->jobListing->company_name }} &middot; {{ $app->applied_at->format('d M Y') }}</p>
                         </div>
-                        @php $status = ['label' => $statusLabel($app->status), 'color' => $statusLabels[$app->status] ?? 'bg-gray-100 text-gray-600']; @endphp
+                        @php $status = ['label' => $statusLabel($app->status), 'color' => $statusBadgeClass($app->status)]; @endphp
                         <span class="text-xs px-2 py-1 rounded-full font-medium {{ $status['color'] }}">{{ $status['label'] }}</span>
                     </div>
                 @endforeach

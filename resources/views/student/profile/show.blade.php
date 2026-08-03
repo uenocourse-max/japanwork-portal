@@ -40,16 +40,8 @@
                 <div>
                     <dt class="text-sm text-gray-500">Status Matching</dt>
                     <dd class="font-medium">
-                        @php
-                        $statusColors = [
-                            'matched' => 'bg-green-100 text-green-800',
-                            'process_matching' => 'bg-yellow-100 text-yellow-800',
-                            'waiting_result' => 'bg-blue-100 text-blue-800',
-                            'not_matched' => 'bg-gray-100 text-gray-800',
-                            'cancelled' => 'bg-red-100 text-red-800',
-                        ];
-                        @endphp
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$student->matching_status] ?? 'bg-gray-100 text-gray-800' }}">
+                        @php $matchingBadgeClass = \App\Enums\MatchingStatus::tryFrom($student->matching_status)?->badgeClass() ?? 'bg-gray-100 text-gray-800'; @endphp
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $matchingBadgeClass }}">
                             {{ \App\Enums\MatchingStatus::tryFrom($student->matching_status)?->label() ?? $student->matching_status }}
                         </span>
                     </dd>

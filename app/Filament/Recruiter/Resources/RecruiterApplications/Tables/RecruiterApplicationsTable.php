@@ -236,7 +236,7 @@ class RecruiterApplicationsTable
                             $actions[] = Action::make('reject_from_profile')
                                 ->label('Tolak')
                                 ->icon('heroicon-o-x-circle')
-                                ->color('gray')
+                                ->color('danger')
                                 ->requiresConfirmation()
                                 ->modalHeading('Tolak Lamaran')
                                 ->modalDescription('Lamaran siswa ini akan ditolak.')
@@ -273,7 +273,11 @@ class RecruiterApplicationsTable
                                             ->content($student->age.' tahun'),
                                         Placeholder::make('gender')
                                             ->label('Jenis Kelamin')
-                                            ->content($student->gender === 'male' ? 'Laki-laki' : 'Perempuan'),
+                                            ->content(fn () => match ($student->gender) {
+                                                'male' => 'Laki-laki',
+                                                'female' => 'Perempuan',
+                                                default => '-',
+                                            }),
                                         Placeholder::make('birth_place')
                                             ->label('Tempat Lahir')
                                             ->content($student->birth_place),
@@ -327,10 +331,18 @@ class RecruiterApplicationsTable
                                     Grid::make(3)->schema([
                                         Placeholder::make('participant_status')
                                             ->label('Status Peserta')
-                                            ->content($student->participant_status === 'ex' ? 'Eks' : 'New Comer'),
+                                            ->content(fn () => match ($student->participant_status) {
+                                                'ex' => 'Eks',
+                                                'new_comer' => 'New Comer',
+                                                default => '-',
+                                            }),
                                         Placeholder::make('pathway')
                                             ->label('Jalur')
-                                            ->content($student->pathway === 'lpk' ? 'LPK' : 'Mandiri'),
+                                            ->content(fn () => match ($student->pathway) {
+                                                'lpk' => 'LPK',
+                                                'mandiri' => 'Mandiri',
+                                                default => '-',
+                                            }),
                                         Placeholder::make('lpk_name')
                                             ->label('LPK')
                                             ->content($student->lpk_name ?? '-'),
@@ -575,7 +587,7 @@ class RecruiterApplicationsTable
                 Action::make('reject')
                     ->label('Tolak')
                     ->icon('heroicon-o-x-circle')
-                    ->color('gray')
+                    ->color('danger')
                     ->requiresConfirmation()
                     ->modalHeading('Tolak Lamaran')
                     ->modalDescription('Lamaran siswa ini akan ditolak.')

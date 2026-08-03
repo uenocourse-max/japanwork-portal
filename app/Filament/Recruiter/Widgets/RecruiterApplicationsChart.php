@@ -36,17 +36,6 @@ class RecruiterApplicationsChart extends ChartWidget
 
         $labels = ApplicationStatus::options();
 
-        $colors = [
-            '#f59e0b', // pending - warning
-            '#3b82f6', // reviewed - blue
-            '#22c55e', // accepted - success
-            '#8b5cf6', // interview_scheduled - purple
-            '#10b981', // company_accepted - emerald
-            '#ef4444', // not_passed - red
-            '#6b7280', // rejected - gray
-            '#94a3b8', // withdrawn - slate
-        ];
-
         $filteredLabels = [];
         $filteredData = [];
         $filteredColors = [];
@@ -55,7 +44,7 @@ class RecruiterApplicationsChart extends ChartWidget
             if (isset($data[$key]) && $data[$key] > 0) {
                 $filteredLabels[] = $label;
                 $filteredData[] = $data[$key];
-                $filteredColors[] = $colors[array_search($key, array_keys($labels))];
+                $filteredColors[] = ApplicationStatus::tryFrom($key)?->hexColor() ?? '#9ca3af';
             }
         }
 

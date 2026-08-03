@@ -20,19 +20,9 @@
                         </div>
                         <div class="ml-4">
                             @php
-                                $statusConfig = [
-                                    'pending' => 'bg-yellow-100 text-yellow-800',
-                                    'reviewed' => 'bg-yellow-100 text-yellow-800',
-                                    'accepted' => 'bg-green-100 text-green-800',
-                                    'interview_scheduled' => 'bg-orange-100 text-orange-800',
-                                    'company_accepted' => 'bg-blue-100 text-blue-800',
-                                    'not_passed' => 'bg-red-100 text-red-800',
-                                    'rejected' => 'bg-red-100 text-red-800',
-                                    'withdrawn' => 'bg-gray-100 text-gray-500',
-                                ];
                                 $status = [
                                     'label' => \App\Enums\ApplicationStatus::tryFrom($application->status)?->label() ?? $application->status,
-                                    'class' => $statusConfig[$application->status] ?? 'bg-gray-100 text-gray-800',
+                                    'class' => \App\Enums\ApplicationStatus::tryFrom($application->status)?->badgeClass() ?? 'bg-gray-100 text-gray-800',
                                 ];
                             @endphp
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $status['class'] }}">

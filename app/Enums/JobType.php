@@ -2,8 +2,12 @@
 
 namespace App\Enums;
 
+use App\Enums\Concerns\HasBadgeClass;
+
 enum JobType: string
 {
+    use HasBadgeClass;
+
     case Magang = 'magang';
     case TokuteiGinou = 'tg';
     case Engineer = 'engineer';

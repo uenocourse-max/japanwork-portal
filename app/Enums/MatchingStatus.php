@@ -2,8 +2,13 @@
 
 namespace App\Enums;
 
+use App\Enums\Concerns\HasBadgeClass;
+use App\Enums\Concerns\HasHexColor;
+
 enum MatchingStatus: string
 {
+    use HasBadgeClass, HasHexColor;
+
     case NotMatched = 'not_matched';
     case ProcessMatching = 'process_matching';
     case WaitingResult = 'waiting_result';

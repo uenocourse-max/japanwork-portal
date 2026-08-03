@@ -190,7 +190,12 @@ class StudentResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('gender')
                     ->label('Jenis Kelamin')
-                    ->formatStateUsing(fn (?string $state): string => $state === 'male' ? 'Laki-laki' : 'Perempuan')
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'male' => 'Laki-laki',
+                        'female' => 'Perempuan',
+                        default => '-',
+                    })
+                    ->placeholder('-')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('phone_number')
                     ->label('Telepon')
@@ -213,7 +218,12 @@ class StudentResource extends Resource
                 Tables\Columns\TextColumn::make('pathway')
                     ->label('Jalur')
                     ->sortable()
-                    ->formatStateUsing(fn (?string $state): string => $state === 'mandiri' ? 'Mandiri' : 'LPK'),
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'mandiri' => 'Mandiri',
+                        'lpk' => 'LPK',
+                        default => '-',
+                    })
+                    ->placeholder('-'),
                 Tables\Columns\TextColumn::make('lpk_name')
                     ->label('LPK Asal')
                     ->sortable()

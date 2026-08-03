@@ -2,8 +2,12 @@
 
 namespace App\Enums;
 
+use App\Enums\Concerns\HasBadgeClass;
+
 enum JlptLevel: string
 {
+    use HasBadgeClass;
+
     case N1 = 'N1';
     case N2 = 'N2';
     case N3 = 'N3';

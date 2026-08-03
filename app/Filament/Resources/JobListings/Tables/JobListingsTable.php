@@ -72,7 +72,8 @@ class JobListingsTable
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (string $state): string => JobStatus::tryFrom($state)?->color() ?? 'gray'),
+                    ->formatStateUsing(fn (?string $state): string => JobStatus::tryFrom($state ?? '')?->label() ?? $state ?? '-')
+                    ->color(fn (?string $state): string => JobStatus::tryFrom($state ?? '')?->color() ?? 'gray'),
                 Tables\Columns\TextColumn::make('poster.lpkTsk.name')
                     ->label('LPK/TSK')
                     ->searchable()

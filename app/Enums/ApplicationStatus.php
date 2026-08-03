@@ -2,8 +2,13 @@
 
 namespace App\Enums;
 
+use App\Enums\Concerns\HasBadgeClass;
+use App\Enums\Concerns\HasHexColor;
+
 enum ApplicationStatus: string
 {
+    use HasBadgeClass, HasHexColor;
+
     case Pending = 'pending';
     case Reviewed = 'reviewed';
     case Accepted = 'accepted';

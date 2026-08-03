@@ -33,19 +33,19 @@ class StudentStatsOverview extends StatsOverviewWidget
             Stat::make('Matched', $matched)
                 ->description('Siswa yang sudah matched')
                 ->descriptionIcon('heroicon-m-check-circle')
-                ->color('success'),
+                ->color(MatchingStatus::Matched->color()),
             Stat::make('Proses Matching', $processMatching)
                 ->description('Siswa dalam proses matching')
                 ->descriptionIcon('heroicon-m-arrow-path')
-                ->color('warning'),
+                ->color(MatchingStatus::ProcessMatching->color()),
             Stat::make('Menunggu Hasil', $waitingResult)
                 ->description('Siswa menunggu hasil')
                 ->descriptionIcon('heroicon-m-clock')
-                ->color('info'),
+                ->color(MatchingStatus::WaitingResult->color()),
             Stat::make('Belum Matching', $notMatched)
                 ->description('Siswa belum matching')
                 ->descriptionIcon('heroicon-m-x-circle')
-                ->color('danger'),
+                ->color(MatchingStatus::NotMatched->color()),
         ];
     }
 }

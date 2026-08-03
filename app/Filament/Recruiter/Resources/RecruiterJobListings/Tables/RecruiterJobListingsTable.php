@@ -52,7 +52,8 @@ class RecruiterJobListingsTable
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (string $state): string => JobStatus::tryFrom($state)?->color() ?? 'gray'),
+                    ->formatStateUsing(fn (?string $state): string => JobStatus::tryFrom($state ?? '')?->label() ?? $state ?? '-')
+                    ->color(fn (?string $state): string => JobStatus::tryFrom($state ?? '')?->color() ?? 'gray'),
                 Tables\Columns\TextColumn::make('deadline')
                     ->label('Deadline')
                     ->date('d M Y')

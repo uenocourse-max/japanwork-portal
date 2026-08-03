@@ -31,11 +31,16 @@ class MatchingChart extends ChartWidget
 
         $labels = MatchingStatus::options();
 
+        $backgroundColor = collect(array_keys($data))
+            ->map(fn (string $status): string => MatchingStatus::tryFrom($status)?->hexColor() ?? '#9ca3af')
+            ->values()
+            ->all();
+
         return [
             'datasets' => [
                 [
                     'data' => array_values($data),
-                    'backgroundColor' => ['#f59e0b', '#22c55e', '#3b82f6', '#94a3b8'],
+                    'backgroundColor' => $backgroundColor,
                 ],
             ],
             'labels' => array_map(fn ($key) => $labels[$key] ?? $key, array_keys($data)),

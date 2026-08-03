@@ -85,7 +85,7 @@
                                     <td class="py-3">
                                         <div class="flex items-center gap-3">
                                             <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-50 text-xs font-medium text-primary-700 dark:bg-primary-500/10 dark:text-primary-400">
-                                                {{ strtoupper(substr($application->student->full_name ?? 'N', 0, 2)) }}
+                                                {{ strtoupper(mb_substr($application->student->full_name ?? '?', 0, 1)) }}
                                             </div>
                                             <div>
                                                 <p class="font-medium text-gray-900 dark:text-white">{{ $application->student->full_name ?? '-' }}</p>
@@ -99,7 +99,7 @@
                                     </td>
                                     <td class="py-3">
                                         @if ($application->student?->jlpt_level)
-                                            <x-filament::badge size="sm" color="info">
+                                            <x-filament::badge size="sm" :color="\App\Enums\JlptLevel::tryFrom($application->student->jlpt_level)?->color() ?? 'gray'">
                                                 {{ $application->student->jlpt_level }}
                                             </x-filament::badge>
                                         @else

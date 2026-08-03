@@ -3,9 +3,11 @@
 namespace App\Filament\Recruiter\Pages;
 
 use BackedEnum;
-use Filament\Forms;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -25,9 +27,69 @@ class Profile extends Page
 
     public function mount(): void
     {
+        $this->fillForm();
+    }
+
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Informasi Akun')
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Nama')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('email')
+                            ->label('Email')
+                            ->email()
+                            ->required()
+                            ->maxLength(255),
+                    ])->columns(2),
+
+                Section::make('Informasi Perusahaan')
+                    ->schema([
+                        TextInput::make('company_name')
+                            ->label('Nama Perusahaan')
+                            ->maxLength(255)
+                            ->nullable(),
+                        TextInput::make('phone_number')
+                            ->label('Nomor Telepon')
+                            ->tel()
+                            ->maxLength(255)
+                            ->nullable(),
+                        TextInput::make('location')
+                            ->label('Lokasi')
+                            ->maxLength(255)
+                            ->nullable(),
+                    ])->columns(3),
+
+                Section::make('Ubah Password')
+                    ->description('Kosongkan jika tidak ingin mengubah password')
+                    ->schema([
+                        TextInput::make('password')
+                            ->label('Password Baru')
+                            ->password()
+                            ->revealable()
+                            ->minLength(8)
+                            ->maxLength(255)
+                            ->dehydrated(fn (?string $state): bool => filled($state)),
+                        TextInput::make('password_confirmation')
+                            ->label('Konfirmasi Password')
+                            ->password()
+                            ->revealable()
+                            ->maxLength(255)
+                            ->dehydrated(fn (?string $state): bool => filled($state)),
+                    ])->columns(2),
+            ])
+            ->statePath('data');
+    }
+
+    protected function fillForm(): void
+    {
         $user = Auth::user();
 
-        $this->data = [
+        $this->form->fill([
             'name' => $user->name,
             'email' => $user->email,
             'phone_number' => $user->phone_number,
@@ -35,59 +97,7 @@ class Profile extends Page
             'location' => $user->location,
             'password' => '',
             'password_confirmation' => '',
-        ];
-    }
-
-    public function getFormSchema(): array
-    {
-        return [
-            Forms\Components\Section::make('Informasi Akun')
-                ->schema([
-                    Forms\Components\TextInput::make('name')
-                        ->label('Nama')
-                        ->required()
-                        ->maxLength(255),
-                    Forms\Components\TextInput::make('email')
-                        ->label('Email')
-                        ->email()
-                        ->required()
-                        ->maxLength(255),
-                ])->columns(2),
-
-            Forms\Components\Section::make('Informasi Perusahaan')
-                ->schema([
-                    Forms\Components\TextInput::make('company_name')
-                        ->label('Nama Perusahaan')
-                        ->maxLength(255)
-                        ->nullable(),
-                    Forms\Components\TextInput::make('phone_number')
-                        ->label('Nomor Telepon')
-                        ->tel()
-                        ->maxLength(255)
-                        ->nullable(),
-                    Forms\Components\TextInput::make('location')
-                        ->label('Lokasi')
-                        ->maxLength(255)
-                        ->nullable(),
-                ])->columns(3),
-
-            Forms\Components\Section::make('Ubah Password')
-                ->description('Kosongkan jika tidak ingin mengubah password')
-                ->schema([
-                    Forms\Components\TextInput::make('password')
-                        ->label('Password Baru')
-                        ->password()
-                        ->revealable()
-                        ->maxLength(255)
-                        ->dehydrated(fn (?string $state): bool => filled($state)),
-                    Forms\Components\TextInput::make('password_confirmation')
-                        ->label('Konfirmasi Password')
-                        ->password()
-                        ->revealable()
-                        ->maxLength(255)
-                        ->dehydrated(fn (?string $state): bool => filled($state)),
-                ])->columns(2),
-        ];
+        ]);
     }
 
     public function save(): void

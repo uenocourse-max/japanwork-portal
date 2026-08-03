@@ -29,19 +29,19 @@ class ApplicationStatsOverview extends StatsOverviewWidget
             Stat::make('Menunggu', $stats[ApplicationStatus::Pending->value] ?? 0)
                 ->description('Lamaran belum direview')
                 ->descriptionIcon('heroicon-m-clock')
-                ->color('warning'),
+                ->color(ApplicationStatus::Pending->color()),
             Stat::make('Interview', $stats[ApplicationStatus::InterviewScheduled->value] ?? 0)
                 ->description('Dalam tahap interview')
                 ->descriptionIcon('heroicon-m-calendar')
-                ->color('warning'),
+                ->color(ApplicationStatus::InterviewScheduled->color()),
             Stat::make('Diterima Perusahaan', $stats[ApplicationStatus::CompanyAccepted->value] ?? 0)
                 ->description('Lamaran lolos seleksi')
                 ->descriptionIcon('heroicon-m-check-circle')
-                ->color('success'),
+                ->color(ApplicationStatus::CompanyAccepted->color()),
             Stat::make('Ditarik', $stats[ApplicationStatus::Withdrawn->value] ?? 0)
                 ->description('Lamaran yang ditarik')
                 ->descriptionIcon('heroicon-m-x-circle')
-                ->color('danger'),
+                ->color(ApplicationStatus::Withdrawn->color()),
         ];
     }
 }
